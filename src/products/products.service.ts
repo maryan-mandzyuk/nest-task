@@ -23,8 +23,8 @@ export class ProductsService {
     return product;
   }
 
-  public async findById(id: number, userId: number): Promise<Product | null> {
-    return await this.getProductByIdAndUserId(id, userId);
+  public async findById(id: number): Promise<Product | null> {
+    return await this.productRepository.findOneOrFail(id);
   }
 
   public async create(productDto: CreateProductDto, user: User): Promise<Product> {    

@@ -17,6 +17,11 @@ export class ProductsController {
         return await this.productsService.findAll(userId);
     }
     
+    @Get('/:id')
+    async findById(@Param() params): Promise<Product> {   
+        return await this.productsService.findById(params.id);
+    }
+
     @UseGuards(JwtAuthGuard)
     @Post()
     async create(@Body() createProductDto: CreateProductDto, @Request() req): Promise<Product>  {
