@@ -57,7 +57,7 @@ export class UsersService {
     const isEqualPass = compareSync(password, user.password);
 
     if(!isEqualPass) {
-        const errors = {username: 'Wrong password.'};
+        const errors = {password: 'Wrong password.'};
         throw new HttpException({message: 'Input data validation failed', errors}, HttpStatus.UNAUTHORIZED);
     }
 

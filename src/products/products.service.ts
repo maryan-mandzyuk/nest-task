@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Product } from './product.entity';
 import { Repository, DeleteResult, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +18,7 @@ export class ProductsService {
     const product = await getRepository(Product)
     .createQueryBuilder('product')
     .where('product.user_id = :userId', {userId})
+    .andWhere('product.isDeleted = false')
     .getMany();
     return product;
   }
@@ -31,7 +32,11 @@ export class ProductsService {
   }
 
   public async delete(id: number, userId: number): Promise<Product> {   
-    const product = await this.getProductByIdAndUserId(id, userId);  
+    const product = await this.getProductByIdAndUserId(id, userId);
+
+    if(!product) {
+      throw new HttpException({message: 'Can not delete'}, HttpStatus.UNAUTHORIZED);
+  }
     product.isDeleted = true;
     return await this.productRepository.save(product);
   }
