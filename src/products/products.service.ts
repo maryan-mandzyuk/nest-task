@@ -14,7 +14,7 @@ export class ProductsService {
   ) {}
 
  
-  public async findAll(userId: number): Promise<Product[]> {
+  public async findByUser(userId: number): Promise<Product[]> {
     const product = await getRepository(Product)
     .createQueryBuilder('product')
     .where('product.user_id = :userId', {userId})

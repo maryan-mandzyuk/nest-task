@@ -10,11 +10,9 @@ import { ProductsService } from "./products.service";
 export class ProductsController {
     constructor(private productsService: ProductsService, private usersService: UsersService) {}
 
-    @UseGuards(JwtAuthGuard)
-    @Get()
-    async findAll(@Request() req): Promise<Product[]> {   
-        const { userId } = req.user;     
-        return await this.productsService.findAll(userId);
+    @Get('/user/:id')
+    async findAll(@Param() params): Promise<Product[]> {   
+        return await this.productsService.findByUser(params.id);
     }
     
     @Get('/:id')
