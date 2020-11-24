@@ -9,6 +9,7 @@ import { Product } from './products/product.entity';
 import { UsersService } from './users/users.service';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -23,7 +24,9 @@ import { ProductsModule } from './products/products.module';
     synchronize: true,
   }),
   UsersModule,
-  ProductsModule],
+  ProductsModule,
+  AuthModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

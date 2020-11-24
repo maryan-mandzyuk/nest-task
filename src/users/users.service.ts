@@ -20,7 +20,7 @@ export class UsersService {
   }
 
 
-  public async findById(id: number): Promise<User | null> {
+  public async findById(id: string): Promise<User | null> {
     return await this.userRepository.findOneOrFail(id);
   }
 
@@ -61,7 +61,7 @@ export class UsersService {
         throw new HttpException({message: 'Input data validation failed', errors}, HttpStatus.UNAUTHORIZED);
     }
 
-    const token = sign(userName, 'secret');
+    const token = sign(user.id, 'secret');
     return token;
   }
 

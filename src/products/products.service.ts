@@ -1,8 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Product } from './product.entity';
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository, DeleteResult, getRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -12,30 +14,43 @@ export class ProductsService {
   ) {}
 
  
-  public async findAll(): Promise<Product[]> {
-    return await this.productRepository.find();
+  public async findAll(userId: number): Promise<Product[]> {
+    const product = await getRepository(Product)
+    .createQueryBuilder('product')
+    .where('product.user_id = :userId', {userId})
+    .getMany();
+    return product;
   }
 
-  public async findById(id: number): Promise<Product | null> {
-    return await this.productRepository.findOneOrFail(id);
+  public async findById(id: number, userId: number): Promise<Product | null> {
+    return await this.getProductByIdAndUserId(id, userId);
   }
 
-  public async create(productDto: CreateProductDto): Promise<Product> {
-    return await this.productRepository.save(productDto);
+  public async create(productDto: CreateProductDto, user: User): Promise<Product> {    
+    return await this.productRepository.save({...productDto, user});
   }
 
-  public async delete(id: number): Promise<DeleteResult> {      
-    return await this.productRepository.delete(id);
+  public async delete(id: number, userId: number): Promise<Product> {   
+    const product = await this.getProductByIdAndUserId(id, userId);  
+    product.isDeleted = true;
+    return await this.productRepository.save(product);
   }
 
-  public async update(id: number, productDto: CreateProductDto): Promise<Product> {
-    const product = await this.productRepository.findOne({
-        where: { id }
-      });
+  public async update(id: number, userId: number, productDto: UpdateProductDto): Promise<Product> {
+    const product = await this.getProductByIdAndUserId(id, userId);
       
       return this.productRepository.save({
         ...product,
         ...productDto
       });
+  }
+
+  private async getProductByIdAndUserId(id: number, userId: number): Promise<Product> {
+    const product = await getRepository(Product)
+    .createQueryBuilder('product')
+    .where('product.id = :id', { id })
+    .andWhere('product.user_id = :userId', {userId})
+    .getOne();
+    return product;
   }
 }

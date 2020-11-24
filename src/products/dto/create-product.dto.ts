@@ -1,4 +1,5 @@
 import { IsOptional, Length } from "class-validator";
+import { User } from "src/users/user.entity";
 
 export class CreateProductDto {
     @Length(2, 250)
@@ -9,4 +10,5 @@ export class CreateProductDto {
 
     @Length(2, 25)
     price: string;
+
 }
