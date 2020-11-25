@@ -1,0 +1,14 @@
+{
+    "dbConfig": {
+        "port": 5432,
+        "host": "localhost",
+        "username": "postgres",
+        "password": "qwerty123",
+        "database": "test-task"
+    },
+    "appConfig": {
+        "port": 3000,
+        "swtSecret": "secret"
+
+    }
+}
