@@ -15,7 +15,7 @@ export class ProductsService {
 
  
   public async findByUser(userId: number): Promise<Product[]> {
-    const product = await getRepository(Product)
+    const product = await this.productRepository
     .createQueryBuilder('product')
     .where('product.user_id = :userId', {userId})
     .andWhere('product.isDeleted = false')
@@ -43,7 +43,6 @@ export class ProductsService {
 
   public async update(id: number, userId: number, productDto: UpdateProductDto): Promise<Product> {
     const product = await this.getProductByIdAndUserId(id, userId);
-      
       return this.productRepository.save({
         ...product,
         ...productDto
@@ -51,7 +50,7 @@ export class ProductsService {
   }
 
   private async getProductByIdAndUserId(id: number, userId: number): Promise<Product> {
-    const product = await getRepository(Product)
+    const product = await this.productRepository
     .createQueryBuilder('product')
     .where('product.id = :id', { id })
     .andWhere('product.user_id = :userId', {userId})

@@ -1,3 +1,4 @@
+import { Logs } from 'src/logs/logs.entity';
 import { Product } from 'src/products/product.entity';
 import {
     Entity,
@@ -9,7 +10,7 @@ import {
   @Entity()
   export class User {
     @PrimaryGeneratedColumn()
-    id: string;
+    id: number;
   
     @Column()
     userName: string;
@@ -25,5 +26,8 @@ import {
 
     @OneToMany(type => Product, product => product.user)
     products: Product[];
+
+    @OneToMany(type => Logs, log => log.user)
+    logs: Logs[];
   }
 

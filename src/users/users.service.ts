@@ -61,7 +61,7 @@ export class UsersService {
         throw new HttpException({message: 'Input data validation failed', errors}, HttpStatus.UNAUTHORIZED);
     }
 
-    const token = sign(user.id, 'secret');
+    const token = sign(user.id.toString(), 'secret');
     return token;
   }
 

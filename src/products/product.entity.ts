@@ -1,11 +1,12 @@
-import { Post } from '@nestjs/common';
+import { Logs } from 'src/logs/logs.entity';
 import { User } from 'src/users/user.entity';
 import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
     ManyToOne,
-    JoinColumn
+    JoinColumn,
+    OneToMany
   } from 'typeorm';
   
   @Entity()
@@ -31,5 +32,8 @@ import {
     @ManyToOne(type => User, user => user.products)
     @JoinColumn({name : 'user_id'})
     user: User;
+
+    @OneToMany(type => Logs, log => log.product)
+    logs: Logs[];
   }
 

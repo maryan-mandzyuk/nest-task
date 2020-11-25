@@ -10,13 +10,15 @@ import { UsersService } from './users/users.service';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
+import { LogsModule } from './logs/logs.module';
 
 
 @Module({
   imports: [TypeOrmModule.forRoot(),
   UsersModule,
   ProductsModule,
-  AuthModule
+  AuthModule,
+  LogsModule
   ],
   controllers: [AppController],
   providers: [AppService],
