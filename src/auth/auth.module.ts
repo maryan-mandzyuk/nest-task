@@ -7,12 +7,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { appConfig } from './../AppConfig';
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
     PassportModule,
     JwtModule.register({
       secret: appConfig.JWT_SECRET,
     }),
   ],
-  providers: [AuthService, JwtStrategy]
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

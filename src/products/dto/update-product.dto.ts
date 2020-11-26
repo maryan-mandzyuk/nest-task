@@ -1,12 +1,12 @@
-import { IsOptional, Length } from "class-validator";
+import { IsOptional, Length } from 'class-validator';
 
 export class UpdateProductDto {
-    @Length(2, 250)
-    name: string;
+  @Length(2, 250)
+  name: string;
 
-    @IsOptional()
-    description: string | null;
+  @IsOptional()
+  description: string | null;
 
-    @Length(2, 25)
-    price: string;
+  @Length(2, 25)
+  price: string;
 }

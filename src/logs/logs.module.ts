@@ -8,6 +8,6 @@ import { LogsService } from './logs.service';
   imports: [TypeOrmModule.forFeature([Logs])],
   controllers: [LogsController],
   providers: [LogsService],
-  exports: [LogsService]
+  exports: [LogsService],
 })
 export class LogsModule {}

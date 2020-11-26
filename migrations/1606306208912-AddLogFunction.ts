@@ -1,9 +1,8 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddLogFunction1606306208912 implements MigrationInterface {
-
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`create or replace function  product_logs_func()
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`create or replace function  product_logs_func()
         returns trigger as $body$
         begin 
             if(TG_OP = 'INSERT') then 
@@ -24,11 +23,10 @@ export class AddLogFunction1606306208912 implements MigrationInterface {
             end if;
         end;
         $body$
-        language plpgsql`)
-    }
+        language plpgsql`);
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP FUNCTIO product_logs_func()`);
-    }
-
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP FUNCTIO product_logs_func()`);
+  }
 }

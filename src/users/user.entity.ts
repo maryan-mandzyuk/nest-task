@@ -1,33 +1,27 @@
 import { Logs } from 'src/logs/logs.entity';
 import { Product } from 'src/products/product.entity';
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    OneToMany
-  } from 'typeorm';
-  
-  @Entity()
-  export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
-  
-    @Column()
-    userName: string;
-  
-    @Column()
-    firstName: string;
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
-    @Column()
-    lastName: string;
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    password: string;
+  @Column()
+  userName: string;
 
-    @OneToMany(type => Product, product => product.user)
-    products: Product[];
+  @Column()
+  firstName: string;
 
-    @OneToMany(type => Logs, log => log.user)
-    logs: Logs[];
-  }
+  @Column()
+  lastName: string;
 
+  @Column()
+  password: string;
+
+  @OneToMany(() => Product, (product) => product.user)
+  products: Product[];
+
+  @OneToMany(() => Logs, (log) => log.user)
+  logs: Logs[];
+}
