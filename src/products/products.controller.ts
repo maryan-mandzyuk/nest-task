@@ -70,6 +70,6 @@ export class ProductsController {
   @Delete('/:id')
   delete(@Param() params, @Request() req) {
     const { userId } = req.user;
-    return this.productsService.delete(params.id, userId);
+    return this.productsService.handleDelete(params.id, userId);
   }
 }

@@ -33,7 +33,7 @@ export class ProductsService {
     return this.productRepository.save({ ...productDto, user });
   }
 
-  public async delete(id: number, userId: number): Promise<Product> {
+  public async handleDelete(id: number, userId: number): Promise<Product> {
     const product = await this.getProductByIdAndUserId({ id, user: userId });
 
     if (!product) {
