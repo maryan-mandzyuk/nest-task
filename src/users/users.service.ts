@@ -7,6 +7,7 @@ import { genSalt, hashSync, compareSync } from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { sign } from 'jsonwebtoken';
 import { appConfig } from 'src/AppConfig';
+import { ERROR_MESSAGES } from 'src/constants';
 
 @Injectable()
 export class UsersService {
@@ -19,8 +20,8 @@ export class UsersService {
     return await this.userRepository.find();
   }
 
-  public async findById(id: string): Promise<User | null> {
-    return await this.userRepository.findOneOrFail(id);
+  public async findById(id: string): Promise<User | never> {
+    return this.userRepository.findOneOrFail(id);
   }
 
   public async create(userDto: CreateUserDto): Promise<User> {
@@ -28,9 +29,8 @@ export class UsersService {
     const user = await this.getUserByUserName(userName);
 
     if (user) {
-      const errors = { username: 'Username must be unique.' };
       throw new HttpException(
-        { message: 'Input data validation failed', errors },
+        { message: ERROR_MESSAGES.USER_NOT_UNIQE },
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -52,19 +52,17 @@ export class UsersService {
     const user = await this.getUserByUserName(userName);
 
     if (!user) {
-      const errors = { username: 'User does not exist.' };
       throw new HttpException(
-        { message: 'Input data validation failed', errors },
-        HttpStatus.UNAUTHORIZED,
+        { message: ERROR_MESSAGES.USER_NOT_FOUND },
+        HttpStatus.NOT_FOUND,
       );
     }
 
     const isEqualPass = compareSync(password, user.password);
 
     if (!isEqualPass) {
-      const errors = { password: 'Wrong password.' };
       throw new HttpException(
-        { message: 'Input data validation failed', errors },
+        { message: ERROR_MESSAGES.WRONG_PASSWORD },
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -80,11 +78,9 @@ export class UsersService {
   }
 
   private async getUserByUserName(userName: string): Promise<User> {
-    const qb = await getRepository(User)
+    return getRepository(User)
       .createQueryBuilder('user')
-      .where('user.userName = :userName', { userName });
-
-    const user = await qb.getOne();
-    return user;
+      .where('user.userName = :userName', { userName })
+      .getOne();
   }
 }

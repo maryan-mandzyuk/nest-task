@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/users/user.entity';
+import { ERROR_MESSAGES } from 'src/constants';
 
 @Injectable()
 export class ProductsService {
@@ -22,15 +23,12 @@ export class ProductsService {
     return product;
   }
 
-  public async findById(id: number): Promise<Product | null> {
-    return await this.productRepository.findOneOrFail(id);
+  public findById(id: number): Promise<Product | null> {
+    return this.productRepository.findOneOrFail(id);
   }
 
-  public async create(
-    productDto: CreateProductDto,
-    user: User,
-  ): Promise<Product> {
-    return await this.productRepository.save({ ...productDto, user });
+  public create(productDto: CreateProductDto, user: User): Promise<Product> {
+    return this.productRepository.save({ ...productDto, user });
   }
 
   public async delete(id: number, userId: number): Promise<Product> {
@@ -38,12 +36,12 @@ export class ProductsService {
 
     if (!product) {
       throw new HttpException(
-        { message: 'Can not delete' },
+        { message: ERROR_MESSAGES.DELETE_PRODUCT },
         HttpStatus.UNAUTHORIZED,
       );
     }
     product.isDeleted = true;
-    return await this.productRepository.save(product);
+    return this.productRepository.save(product);
   }
 
   public async update(

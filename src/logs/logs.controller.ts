@@ -9,10 +9,10 @@ export class LogsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('')
-  async findLogsByUser(@Request() req, @Query() query): Promise<Logs[]> {
+  findLogsByUser(@Request() req, @Query() query): Promise<Logs[]> {
     const { userId } = req.user;
     const { operation_type, data_type, start_time, end_time, page } = query;
-    return await this.logsService.findByUser(
+    return this.logsService.findByUser(
       userId,
       operation_type,
       data_type,

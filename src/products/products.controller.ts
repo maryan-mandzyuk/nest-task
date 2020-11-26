@@ -24,13 +24,13 @@ export class ProductsController {
   ) {}
 
   @Get('/user/:id')
-  async findAll(@Param() params): Promise<Product[]> {
-    return await this.productsService.findByUser(params.id);
+  findAll(@Param() params): Promise<Product[]> {
+    return this.productsService.findByUser(params.id);
   }
 
   @Get('/:id')
-  async findById(@Param() params): Promise<Product> {
-    return await this.productsService.findById(params.id);
+  findById(@Param() params): Promise<Product> {
+    return this.productsService.findById(params.id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -42,28 +42,24 @@ export class ProductsController {
     const { userId } = req.user;
     const user = await this.usersService.findById(userId);
 
-    return await this.productsService.create(createProductDto, user);
+    return this.productsService.create(createProductDto, user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('/:id')
-  async update(
+  update(
     @Body() updateProductDto: UpdateProductDto,
     @Param() params,
     @Request() req,
   ): Promise<Product> {
     const { userId } = req.user;
-    return await this.productsService.update(
-      params.id,
-      userId,
-      updateProductDto,
-    );
+    return this.productsService.update(params.id, userId, updateProductDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('/:id')
-  async delete(@Param() params, @Request() req) {
+  delete(@Param() params, @Request() req) {
     const { userId } = req.user;
-    return await this.productsService.delete(params.id, userId);
+    return this.productsService.delete(params.id, userId);
   }
 }
