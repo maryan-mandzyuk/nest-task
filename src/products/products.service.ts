@@ -6,7 +6,8 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/users/user.entity';
 import { ERROR_MESSAGES } from 'src/constants';
-
+import { appConfig } from 'src/AppConfig';
+import { FindProductQueryDto } from './dto/find-froduct.dto';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -14,11 +15,17 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  public async handleFindByUser(userId: number): Promise<Product[]> {
+  public async handleFindByUser(
+    userId,
+    { orderPrice = 'ASC', page = 1 }: FindProductQueryDto,
+  ): Promise<Product[]> {
     return this.productRepository
       .createQueryBuilder('product')
       .where('product.user_id = :userId', { userId })
       .andWhere('product.isDeleted = false')
+      .skip(appConfig.PRODUCTS_PER_PAGE * (page - 1))
+      .take(appConfig.PRODUCTS_PER_PAGE)
+      .orderBy({ price: orderPrice })
       .getMany();
   }
 

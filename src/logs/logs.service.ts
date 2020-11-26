@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { appConfig } from 'src/AppConfig';
 import { Repository } from 'typeorm';
+import { FindLogsQueryDto } from './dto/find-logs.dto';
 import { Logs } from './logs.entity';
-import { handelFindByUserProps } from './logs.interfaces';
-
 @Injectable()
 export class LogsService {
   constructor(
@@ -12,14 +11,10 @@ export class LogsService {
     private readonly logsRepository: Repository<Logs>,
   ) {}
 
-  public async handelFindByUser({
+  public async handelFindByUser(
     userId,
-    operation,
-    dataType,
-    startTime,
-    endTime,
-    page = 1,
-  }: handelFindByUserProps): Promise<Logs[]> {
+    { operation, dataType, startTime, endTime, page = 1 }: FindLogsQueryDto,
+  ): Promise<Logs[]> {
     const logs = await this.logsRepository
       .createQueryBuilder('logs')
       .leftJoinAndSelect('logs.product', 'product')

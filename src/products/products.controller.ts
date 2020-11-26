@@ -8,12 +8,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { FindProductQueryDto } from './dto/find-froduct.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
@@ -26,9 +28,12 @@ export class ProductsController {
   ) {}
 
   @Get('/me')
-  findAll(@Request() req): Promise<Product[]> {
+  findAll(
+    @Request() req,
+    @Query() query: FindProductQueryDto,
+  ): Promise<Product[]> {
     const { userId } = req.user;
-    return this.productsService.handleFindByUser(userId);
+    return this.productsService.handleFindByUser(userId, { ...query });
   }
 
   @Get('/:id')
