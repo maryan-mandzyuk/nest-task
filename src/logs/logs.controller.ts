@@ -11,14 +11,6 @@ export class LogsController {
   @Get('')
   findLogsByUser(@Request() req, @Query() query): Promise<Logs[]> {
     const { userId } = req.user;
-    const { operation_type, data_type, start_time, end_time, page } = query;
-    return this.logsService.handelFindByUser(
-      userId,
-      operation_type,
-      data_type,
-      start_time,
-      end_time,
-      page,
-    );
+    return this.logsService.handelFindByUser({ ...query, userId });
   }
 }

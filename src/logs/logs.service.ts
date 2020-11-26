@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { appConfig } from 'src/AppConfig';
 import { Repository } from 'typeorm';
 import { Logs } from './logs.entity';
+import { handelFindByUserProps } from './logs.interfaces';
 
 @Injectable()
 export class LogsService {
@@ -11,14 +12,14 @@ export class LogsService {
     private readonly logsRepository: Repository<Logs>,
   ) {}
 
-  public async handelFindByUser(
-    userId: number,
-    operation: string,
-    dataType: string,
-    startTime: string,
-    endTime: string,
+  public async handelFindByUser({
+    userId,
+    operation,
+    dataType,
+    startTime,
+    endTime,
     page = 1,
-  ): Promise<Logs[]> {
+  }: handelFindByUserProps): Promise<Logs[]> {
     const logs = await this.logsRepository
       .createQueryBuilder('logs')
       .leftJoinAndSelect('logs.product', 'product')

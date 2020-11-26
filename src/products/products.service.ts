@@ -34,7 +34,7 @@ export class ProductsService {
   }
 
   public async delete(id: number, userId: number): Promise<Product> {
-    const product = await this.getProductByIdAndUserId(id, userId);
+    const product = await this.getProductByIdAndUserId({ id, user: userId });
 
     if (!product) {
       throw new HttpException(
@@ -51,21 +51,17 @@ export class ProductsService {
     userId: number,
     productDto: UpdateProductDto,
   ): Promise<Product> {
-    const product = await this.getProductByIdAndUserId(id, userId);
+    const product = await this.getProductByIdAndUserId({ id, user: userId });
     return this.productRepository.save({
       ...product,
       ...productDto,
     });
   }
 
-  private async getProductByIdAndUserId(
-    id: number,
-    userId: number,
-  ): Promise<Product> {
+  private async getProductByIdAndUserId(query): Promise<Product> {
     const product = await this.productRepository
       .createQueryBuilder('product')
-      .where('product.id = :id', { id })
-      .andWhere('product.user_id = :userId', { userId })
+      .where(query)
       .getOne();
     return product;
   }

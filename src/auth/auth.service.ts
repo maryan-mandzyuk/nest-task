@@ -18,7 +18,7 @@ export class AuthService {
   public async handleLogin(loginDto: LoginUserDto): Promise<string> {
     try {
       const { userName, password } = loginDto;
-      const user = await this.getUserByUserName(userName);
+      const user = await this.getUserByUserName({ userName });
 
       if (!user) {
         throw new HttpException(
@@ -45,7 +45,7 @@ export class AuthService {
 
   public async handleCreate(userDto: CreateUserDto): Promise<User> {
     const { userName, password } = userDto;
-    const user = await this.getUserByUserName(userName);
+    const user = await this.getUserByUserName({ userName });
 
     if (user) {
       throw new HttpException(
@@ -75,10 +75,7 @@ export class AuthService {
     }
   }
 
-  private async getUserByUserName(userName: string): Promise<User> {
-    return this.userRepository
-      .createQueryBuilder('user')
-      .where('user.userName = :userName', { userName })
-      .getOne();
+  private async getUserByUserName(query): Promise<User> {
+    return this.userRepository.createQueryBuilder('user').where(query).getOne();
   }
 }
