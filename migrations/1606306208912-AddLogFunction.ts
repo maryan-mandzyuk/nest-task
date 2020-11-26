@@ -11,13 +11,16 @@ export class AddLogFunction1606306208912 implements MigrationInterface {
                 values('INSERT', new.id, 'products', new.user_id);
                 return new;
             elseif (TG_OP = 'UPDATE') then
-                insert into logs (operation_type, product_id, data_type, user_id)
-                values('UPDATE', new.id, 'products', new.user_id);
-                return new;
-            elseif (TG_OP = 'DELETE') then
-                insert into logs (operation_type, product_id, data_type, user_id)
-                values('DELETE', old.id, 'products', old.user_id);
-                return old;
+                if (new."isDeleted" = true) then
+                    insert into logs (operation_type, product_id, data_type, user_id)
+                    values('DELETE', old.id, 'products', old.user_id);
+                    return new;
+        
+                else
+                    insert into logs (operation_type, product_id, data_type, user_id)
+                    values('UPDATE', new.id, 'products', new.user_id);
+                    return new;
+                end if;
             end if;
         end;
         $body$

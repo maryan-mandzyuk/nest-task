@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { genSalt, hashSync, compareSync } from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { sign } from 'jsonwebtoken';
+import { appConfig } from 'src/AppConfig';
 
 @Injectable()
 export class UsersService {
@@ -61,7 +62,7 @@ export class UsersService {
         throw new HttpException({message: 'Input data validation failed', errors}, HttpStatus.UNAUTHORIZED);
     }
 
-    const token = sign(user.id.toString(), 'secret');
+    const token = sign(user.id.toString(), appConfig.JWT_SECRET);
     return token;
   }
 
