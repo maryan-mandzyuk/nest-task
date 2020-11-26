@@ -9,21 +9,11 @@ export class UsersController {
 
   @Get('/:id')
   async findAll(@Param() params): Promise<User> {
-    return this.usersService.findById(params.id);
-  }
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
-  }
-
-  @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto): Promise<string> {
-    return this.usersService.login(loginUserDto);
+    return this.usersService.handleFindById(params.id);
   }
 
   @Delete('/:id')
-  async delete(@Param() params) {
-    return await this.usersService.delete(params.id);
+  delete(@Param() params) {
+    return this.usersService.handleDelete(params.id);
   }
 }

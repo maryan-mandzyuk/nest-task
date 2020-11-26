@@ -4,6 +4,7 @@ import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConne
 export const appConfig = {
   PORT: get('appConfig.port'),
   JWT_SECRET: get('appConfig.jwtSecret'),
+  LOGS_PER_PAGE: 10,
 };
 
 export const dbConfig: PostgresConnectionOptions = {

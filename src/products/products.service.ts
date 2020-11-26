@@ -14,20 +14,22 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  public async findByUser(userId: number): Promise<Product[]> {
-    const product = await this.productRepository
+  public async handleFindByUser(userId: number): Promise<Product[]> {
+    return this.productRepository
       .createQueryBuilder('product')
       .where('product.user_id = :userId', { userId })
       .andWhere('product.isDeleted = false')
       .getMany();
-    return product;
   }
 
-  public findById(id: number): Promise<Product | null> {
+  public handleFindById(id: number): Promise<Product> {
     return this.productRepository.findOneOrFail(id);
   }
 
-  public create(productDto: CreateProductDto, user: User): Promise<Product> {
+  public handelCreate(
+    productDto: CreateProductDto,
+    user: User,
+  ): Promise<Product> {
     return this.productRepository.save({ ...productDto, user });
   }
 
@@ -44,7 +46,7 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
-  public async update(
+  public async handleUpdate(
     id: number,
     userId: number,
     productDto: UpdateProductDto,

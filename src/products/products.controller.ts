@@ -3,19 +3,21 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Put,
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
-
+@UseGuards(AuthGuard)
 @Controller('products')
 export class ProductsController {
   constructor(
@@ -23,29 +25,34 @@ export class ProductsController {
     private usersService: UsersService,
   ) {}
 
-  @Get('/user/:id')
-  findAll(@Param() params): Promise<Product[]> {
-    return this.productsService.findByUser(params.id);
+  @Get('/me')
+  findAll(@Request() req): Promise<Product[]> {
+    const { userId } = req.user;
+    return this.productsService.handleFindByUser(userId);
   }
 
   @Get('/:id')
   findById(@Param() params): Promise<Product> {
-    return this.productsService.findById(params.id);
+    return this.productsService.handleFindById(params.id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body() createProductDto: CreateProductDto,
     @Request() req,
   ): Promise<Product> {
-    const { userId } = req.user;
-    const user = await this.usersService.findById(userId);
-
-    return this.productsService.create(createProductDto, user);
+    try {
+      const { userId } = req.user;
+      const user = await this.usersService.handleFindById(userId);
+      return this.productsService.handelCreate(createProductDto, user);
+    } catch (e) {
+      throw new HttpException(
+        { message: e.message },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Put('/:id')
   update(
     @Body() updateProductDto: UpdateProductDto,
@@ -53,10 +60,13 @@ export class ProductsController {
     @Request() req,
   ): Promise<Product> {
     const { userId } = req.user;
-    return this.productsService.update(params.id, userId, updateProductDto);
+    return this.productsService.handleUpdate(
+      params.id,
+      userId,
+      updateProductDto,
+    );
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete('/:id')
   delete(@Param() params, @Request() req) {
     const { userId } = req.user;

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { appConfig } from 'src/AppConfig';
 import { Repository } from 'typeorm';
 import { Logs } from './logs.entity';
 
@@ -10,7 +11,7 @@ export class LogsService {
     private readonly logsRepository: Repository<Logs>,
   ) {}
 
-  public async findByUser(
+  public async handelFindByUser(
     userId: number,
     operation: string,
     dataType: string,
@@ -18,7 +19,6 @@ export class LogsService {
     endTime: string,
     page = 1,
   ): Promise<Logs[]> {
-    const logsPerPage = 10;
     const logs = await this.logsRepository
       .createQueryBuilder('logs')
       .leftJoinAndSelect('logs.product', 'product')
@@ -35,8 +35,8 @@ export class LogsService {
       .andWhere(endTime ? 'logs.createdAt < :endTime' : 'TRUE', {
         endTime,
       })
-      .skip(logsPerPage * (page - 1))
-      .take(logsPerPage)
+      .skip(appConfig.LOGS_PER_PAGE * (page - 1))
+      .take(appConfig.LOGS_PER_PAGE)
       .getMany();
 
     return logs;
