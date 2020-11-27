@@ -19,8 +19,9 @@ export class AuthGuard implements CanActivate {
     const token = request.headers['authorization'];
 
     try {
-      const userId = verify(token.replace('Bearer ', ''), appConfig.JWT_SECRET);
-      request['user'] = { userId };
+      const user = verify(token.replace('Bearer ', ''), appConfig.JWT_SECRET);
+
+      request['user'] = user;
       return true;
     } catch (e) {
       throw new HttpException(

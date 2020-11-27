@@ -1,14 +1,17 @@
 {
-    "dbConfig": {
-        "port": 5432,
-        "host": "localhost",
-        "username": "postgres",
-        "password": "qwerty123",
-        "database": "test-task"
-    },
-    "appConfig": {
-        "port": 3000,
-        "jwtSecret": "secret"
-
-    }
+  "dbConfig": {
+    "port": 5432,
+    "host": "localhost",
+    "username": "postgres",
+    "password": "qwerty123",
+    "database": "test-task"
+  },
+  "appConfig": {
+    "port": 3000,
+    "jwtSecret": "secret"
+  },
+  "redisConfig": {
+    "port": 6379,
+    "host": "127.0.0.1"
+  }
 }

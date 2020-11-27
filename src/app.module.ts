@@ -6,7 +6,8 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { LogsModule } from './logs/logs.module';
-import { dbConfig } from './AppConfig';
+import { dbConfig, redisConfig } from './AppConfig';
+import { RedisModule } from 'nestjs-redis';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { dbConfig } from './AppConfig';
     ProductsModule,
     AuthModule,
     LogsModule,
+    RedisModule.register(redisConfig),
   ],
   controllers: [AppController],
   providers: [AppService],

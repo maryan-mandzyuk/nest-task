@@ -6,6 +6,7 @@ export const appConfig = {
   JWT_SECRET: get('appConfig.jwtSecret'),
   LOGS_PER_PAGE: 10,
   PRODUCTS_PER_PAGE: 10,
+  ACCESS_TOKEN_EXPIRE_MIN: 30,
 };
 
 export const dbConfig: PostgresConnectionOptions = {
@@ -22,4 +23,9 @@ export const dbConfig: PostgresConnectionOptions = {
   cli: {
     migrationsDir: 'migrations',
   },
+};
+
+export const redisConfig = {
+  port: get('redisConfig.port'),
+  host: get('redisConfig.host'),
 };
