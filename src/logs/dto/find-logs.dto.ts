@@ -1,9 +1,10 @@
+import { Type } from 'class-transformer/decorators';
 import {
   IsDateString,
   IsIn,
+  IsInt,
   IsOptional,
   Length,
-  Max,
   Min,
 } from 'class-validator';
 export class FindLogsQueryDto {
@@ -24,5 +25,8 @@ export class FindLogsQueryDto {
   endTime: string;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   page: number;
 }
