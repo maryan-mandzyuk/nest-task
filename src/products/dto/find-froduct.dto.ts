@@ -14,4 +14,8 @@ export class FindProductQueryDto {
   @IsOptional()
   @IsIn(['ASC', 'DESC', 'asc', 'desc'])
   orderPrice: 'ASC' | 'DESC';
+
+  @IsOptional()
+  @Length(1, 25)
+  searchTerm: string;
 }
