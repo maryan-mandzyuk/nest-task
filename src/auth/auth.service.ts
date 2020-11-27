@@ -59,7 +59,10 @@ export class AuthService {
         refreshToken,
       };
     } catch (e) {
-      throw e;
+      throw new HttpException(
+        { message: ERROR_MESSAGES.SEVER_ERROR, error: e },
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -159,7 +162,7 @@ export class AuthService {
       return hashPass;
     } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.SEVER_ERROR },
+        { message: ERROR_MESSAGES.SEVER_ERROR, error: e },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
