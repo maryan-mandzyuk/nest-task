@@ -7,3 +7,8 @@ export interface TokenProps {
   userId: string | number;
   userName: string;
 }
+
+export interface TokensKey {
+  accessTokenKey: string;
+  refreshTokenKey: string;
+}

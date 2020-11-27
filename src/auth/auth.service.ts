@@ -9,7 +9,7 @@ import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
-import { TokenProps, TokensResponse } from './auth.interfaces';
+import { TokenProps, TokensKey, TokensResponse } from './auth.interfaces';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +48,7 @@ export class AuthService {
 
       const { accessTokenKey, refreshTokenKey } = this.handleTokensKeyName({
         userId: user.id,
-        userName,
+        userName: user.userName,
       });
 
       await redisClient.set(accessTokenKey, accessToken);
@@ -66,7 +66,6 @@ export class AuthService {
   public async refreshTokens(refreshToken: string): Promise<TokensResponse> {
     try {
       const user = verify(refreshToken, appConfig.JWT_SECRET);
-      const redisClient = await this.redisService.getClient();
 
       const userId = user['userId'];
       const userName = user['userName'];
@@ -76,6 +75,7 @@ export class AuthService {
         userName,
       });
 
+      const redisClient = await this.redisService.getClient();
       const oldRefreshToken = await redisClient.get(refreshTokenKey);
 
       if (oldRefreshToken !== refreshToken) {
@@ -127,7 +127,7 @@ export class AuthService {
     });
   }
 
-  private handleTokensKeyName({ userId, userName }: TokenProps) {
+  private handleTokensKeyName({ userId, userName }: TokenProps): TokensKey {
     const accessTokenKey = `accessToken_${userId}_${userName}`;
     const refreshTokenKey = `refreshToken_${userId}_${userName}`;
 
