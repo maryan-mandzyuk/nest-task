@@ -1,4 +1,4 @@
-import { verify } from 'jsonwebtoken';
+import { decode } from 'jsonwebtoken';
 import { appConfig } from 'src/AppConfig';
 import { TOKEN_HEADER_KEY, TOKEN_TYPES } from 'src/constants';
 import { ITokenPayload } from './auth.interfaces';
@@ -14,7 +14,7 @@ export class AuthHelper {
   }
 
   public decodeTokenPayload(token: string): ITokenPayload {
-    return verify(token, appConfig.JWT_SECRET) as ITokenPayload;
+    return decode(token, appConfig.JWT_SECRET) as ITokenPayload;
   }
 
   public getTokenHeaderKey(type: TOKEN_TYPES): TOKEN_HEADER_KEY {
