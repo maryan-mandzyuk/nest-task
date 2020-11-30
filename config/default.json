@@ -9,8 +9,6 @@
   "appConfig": {
     "port": 3000,
     "jwtSecret": "secret",
-    "logsPerPage": 10,
-    "productsPerPage": 10,
     "accessTokenExpireMin": 30,
     "refreshTokenExpireMin": 90
   },

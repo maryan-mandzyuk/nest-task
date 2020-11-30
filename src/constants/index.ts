@@ -6,7 +6,10 @@ export const ERROR_MESSAGES = {
   SEVER_ERROR: 'Server error',
   TOKEN_INVALID: 'Invalid token',
 };
+export const LOGS_PER_PAGE = 10;
+export const PRODUCTS_PER_PAGE = 10;
 
+export const REFRESH_TOKEN_HEADER = 'x-refresh-token';
 export const TOKEN_TYPE = {
   ACCESS: 'access',
   REFRESH: 'refresh',

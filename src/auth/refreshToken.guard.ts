@@ -8,7 +8,11 @@ import {
 import { verify } from 'jsonwebtoken';
 import { Observable } from 'rxjs';
 import { appConfig } from 'src/AppConfig';
-import { ERROR_MESSAGES, TOKEN_TYPE } from 'src/constants';
+import {
+  ERROR_MESSAGES,
+  REFRESH_TOKEN_HEADER,
+  TOKEN_TYPE,
+} from 'src/constants';
 
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
@@ -17,7 +21,7 @@ export class RefreshTokenGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     try {
       const request: Request = context.switchToHttp().getRequest();
-      const authHeader = request.headers['x-refresh-token'];
+      const authHeader = request.headers[REFRESH_TOKEN_HEADER];
       const token = authHeader.replace('Bearer ', '');
       const tokenPayload = verify(token, appConfig.JWT_SECRET);
 
