@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compareSync, genSalt, hashSync } from 'bcrypt';
-import { sign, verify } from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 import { appConfig } from 'src/AppConfig';
 import {
   ERROR_MESSAGES,
-  TOKEN_TYPE,
+  TOKEN_TYPES,
   USER_REFRESH_TOKEN_KEY,
 } from 'src/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -14,12 +14,14 @@ import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
 import { TokensResponse } from './auth.interfaces';
+import { AuthHelper } from './authHelper';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly redisService: RedisService,
+    private authHelper: AuthHelper,
   ) {}
 
   public async handleLogin(loginDto: LoginUserDto): Promise<TokensResponse> {
@@ -65,8 +67,7 @@ export class AuthService {
 
   public async refreshTokens(refreshToken: string): Promise<TokensResponse> {
     try {
-      const user = verify(refreshToken, appConfig.JWT_SECRET);
-      const userId = user['userId'];
+      const { userId } = this.authHelper.decodeTokenPayload(refreshToken);
 
       const refreshTokenKey = USER_REFRESH_TOKEN_KEY(userId);
 
@@ -120,7 +121,7 @@ export class AuthService {
 
   private handleTokensGenerate(userId: string | number): TokensResponse {
     const accessToken = sign(
-      { userId, type: TOKEN_TYPE.ACCESS },
+      { userId, type: TOKEN_TYPES.ACCESS },
       appConfig.JWT_SECRET,
       {
         expiresIn: `${appConfig.ACCESS_TOKEN_EXPIRE_MIN}m`,
@@ -128,7 +129,7 @@ export class AuthService {
     );
 
     const refreshToken = sign(
-      { userId, type: TOKEN_TYPE.REFRESH },
+      { userId, type: TOKEN_TYPES.REFRESH },
       appConfig.JWT_SECRET,
       {
         expiresIn: `${appConfig.REFRESH_TOKEN_EXPIRE_MIN}m`,

@@ -5,34 +5,37 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { verify } from 'jsonwebtoken';
 import { Observable } from 'rxjs';
-import { appConfig } from 'src/AppConfig';
-import { ERROR_MESSAGES, TOKEN_TYPE } from 'src/constants';
+import { ERROR_MESSAGES, TOKEN_TYPES } from 'src/constants';
+import { AuthHelper } from './authHelper';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  constructor(private tokenType: TOKEN_TYPES, private authHelper: AuthHelper) {}
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     try {
       const request: Request = context.switchToHttp().getRequest();
-      const authHeader = request.headers['authorization'];
-      const token = authHeader.replace('Bearer ', '');
-      const tokenPayload = verify(token, appConfig.JWT_SECRET);
+      const tokenHeaderKey = this.authHelper.getTokenHeaderKey(this.tokenType);
+      const token = this.authHelper.getTokenFromRequest(
+        request,
+        tokenHeaderKey,
+      );
 
-      if (tokenPayload['type'] !== TOKEN_TYPE.ACCESS) {
+      const tokenPayload = this.authHelper.decodeTokenPayload(token);
+
+      if (tokenPayload.type !== this.tokenType) {
         throw new HttpException(
           ERROR_MESSAGES.TOKEN_INVALID,
           HttpStatus.UNAUTHORIZED,
         );
       }
 
-      request['user'] = tokenPayload;
       return true;
     } catch (e) {
       throw new HttpException(
-        ERROR_MESSAGES.TOKEN_INVALID,
+        { message: ERROR_MESSAGES.TOKEN_INVALID, error: e },
         HttpStatus.UNAUTHORIZED,
       );
     }

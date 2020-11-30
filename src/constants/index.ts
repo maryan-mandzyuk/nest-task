@@ -9,9 +9,13 @@ export const ERROR_MESSAGES = {
 export const LOGS_PER_PAGE = 10;
 export const PRODUCTS_PER_PAGE = 10;
 
-export const REFRESH_TOKEN_HEADER = 'x-refresh-token';
-export const TOKEN_TYPE = {
-  ACCESS: 'access',
-  REFRESH: 'refresh',
-};
+export enum TOKEN_HEADER_KEY {
+  REFRESH = 'x-refresh-token',
+  ACCESS = 'authorization',
+}
+
+export enum TOKEN_TYPES {
+  ACCESS = 'access',
+  REFRESH = 'refresh',
+}
 export const USER_REFRESH_TOKEN_KEY = (userId) => `refreshToken_${userId}`;

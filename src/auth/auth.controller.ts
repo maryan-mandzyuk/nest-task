@@ -1,14 +1,27 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { TOKEN_HEADER_KEY, TOKEN_TYPES } from 'src/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { User } from 'src/users/user.entity';
+import { AuthGuard } from './auth.guard';
 import { TokensResponse } from './auth.interfaces';
 import { AuthService } from './auth.service';
-import { RefreshTokenGuard } from './refreshToken.guard';
+import { AuthHelper } from './authHelper';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private authHelper: AuthHelper,
+  ) {}
 
   @Post('/login')
   async login(@Body() loginUserDto: LoginUserDto): Promise<TokensResponse> {
@@ -21,8 +34,12 @@ export class AuthController {
   }
 
   @Get('/refresh-token')
-  @UseGuards(RefreshTokenGuard)
-  refresh(@Req() req): Promise<TokensResponse> {
-    return this.authService.refreshTokens(req['user']);
+  @UseGuards(new AuthGuard(TOKEN_TYPES.REFRESH, new AuthHelper()))
+  refresh(@Req() req: Request): Promise<TokensResponse> {
+    const token = this.authHelper.getTokenFromRequest(
+      req,
+      TOKEN_HEADER_KEY.REFRESH,
+    );
+    return this.authService.refreshTokens(token);
   }
 }

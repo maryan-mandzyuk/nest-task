@@ -6,7 +6,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/users/user.entity';
 import { ERROR_MESSAGES, PRODUCTS_PER_PAGE } from 'src/constants';
-import { FindProductQueryDto } from './dto/find-froduct.dto';
+import { FindProductQueryDto } from './dto/find-product.dto';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -42,7 +42,7 @@ export class ProductsService {
     return this.productRepository.save({ ...productDto, user });
   }
 
-  public async handleDelete(id: number, userId: number): Promise<Product> {
+  public async handleDelete(id: number, userId: string): Promise<Product> {
     const product = await this.getProductByIdAndUserId({ id, user: userId });
 
     if (!product) {
@@ -57,7 +57,7 @@ export class ProductsService {
 
   public async handleUpdate(
     id: number,
-    userId: number,
+    userId: string,
     productDto: UpdateProductDto,
   ): Promise<Product> {
     const product = await this.getProductByIdAndUserId({ id, user: userId });
