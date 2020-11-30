@@ -8,7 +8,7 @@ export class UserAddEmail1606752189104 implements MigrationInterface {
         name: 'email',
         type: 'varchar',
         isUnique: true,
-        isNullable: false,
+        isNullable: true,
       }),
     );
 
