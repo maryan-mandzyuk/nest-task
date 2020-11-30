@@ -5,9 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/users/user.entity';
-import { ERROR_MESSAGES } from 'src/constants';
-import { appConfig } from 'src/AppConfig';
-import { FindProductQueryDto } from './dto/find-froduct.dto';
+import { ERROR_MESSAGES, PRODUCTS_PER_PAGE } from 'src/constants';
+import { FindProductQueryDto } from './dto/find-product.dto';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -26,8 +25,8 @@ export class ProductsService {
       .andWhere(searchTerm ? 'product.name ILIKE :searchTerm' : 'TRUE', {
         searchTerm: `%${searchTerm}%`,
       })
-      .skip(appConfig.PRODUCTS_PER_PAGE * (page - 1))
-      .take(appConfig.PRODUCTS_PER_PAGE)
+      .skip(PRODUCTS_PER_PAGE * (page - 1))
+      .take(PRODUCTS_PER_PAGE)
       .orderBy({ price: orderPrice })
       .getMany();
   }
@@ -43,7 +42,7 @@ export class ProductsService {
     return this.productRepository.save({ ...productDto, user });
   }
 
-  public async handleDelete(id: number, userId: number): Promise<Product> {
+  public async handleDelete(id: number, userId: string): Promise<Product> {
     const product = await this.getProductByIdAndUserId({ id, user: userId });
 
     if (!product) {
@@ -58,7 +57,7 @@ export class ProductsService {
 
   public async handleUpdate(
     id: number,
-    userId: number,
+    userId: string,
     productDto: UpdateProductDto,
   ): Promise<Product> {
     const product = await this.getProductByIdAndUserId({ id, user: userId });

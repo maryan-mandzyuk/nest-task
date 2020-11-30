@@ -1,15 +1,20 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compareSync, genSalt, hashSync } from 'bcrypt';
-import { sign, verify } from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 import { appConfig } from 'src/AppConfig';
-import { ERROR_MESSAGES } from 'src/constants';
+import {
+  ERROR_MESSAGES,
+  TOKEN_TYPES,
+  USER_REFRESH_TOKEN_KEY,
+} from 'src/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
-import { TokenProps, TokensKey, TokensResponse } from './auth.interfaces';
+import { TokensResponse } from './auth.interfaces';
+import { AuthHelper } from './authHelper';
 
 @Injectable()
 export class AuthService {
@@ -41,17 +46,10 @@ export class AuthService {
 
       const redisClient = await this.redisService.getClient();
 
-      const { accessToken, refreshToken } = this.handleTokensGenerate({
-        userName: user.userName,
-        userId: user.id,
-      });
+      const { accessToken, refreshToken } = this.handleTokensGenerate(user.id);
 
-      const { accessTokenKey, refreshTokenKey } = this.handleTokensKeyName({
-        userId: user.id,
-        userName: user.userName,
-      });
+      const refreshTokenKey = USER_REFRESH_TOKEN_KEY(user.id);
 
-      await redisClient.set(accessTokenKey, accessToken);
       await redisClient.set(refreshTokenKey, refreshToken);
 
       return {
@@ -68,15 +66,9 @@ export class AuthService {
 
   public async refreshTokens(refreshToken: string): Promise<TokensResponse> {
     try {
-      const user = verify(refreshToken, appConfig.JWT_SECRET);
+      const { userId } = AuthHelper.decodeTokenPayload(refreshToken);
 
-      const userId = user['userId'];
-      const userName = user['userName'];
-
-      const { refreshTokenKey, accessTokenKey } = this.handleTokensKeyName({
-        userId,
-        userName,
-      });
+      const refreshTokenKey = USER_REFRESH_TOKEN_KEY(userId);
 
       const redisClient = await this.redisService.getClient();
       const oldRefreshToken = await redisClient.get(refreshTokenKey);
@@ -91,12 +83,8 @@ export class AuthService {
       const {
         accessToken: newAccess,
         refreshToken: newRefresh,
-      } = this.handleTokensGenerate({
-        userId,
-        userName,
-      });
+      } = this.handleTokensGenerate(userId);
 
-      await redisClient.set(accessTokenKey, newAccess);
       await redisClient.set(refreshTokenKey, newRefresh);
 
       return {
@@ -130,25 +118,22 @@ export class AuthService {
     });
   }
 
-  private handleTokensKeyName({ userId, userName }: TokenProps): TokensKey {
-    const accessTokenKey = `accessToken_${userId}_${userName}`;
-    const refreshTokenKey = `refreshToken_${userId}_${userName}`;
+  private handleTokensGenerate(userId: string | number): TokensResponse {
+    const accessToken = sign(
+      { userId, type: TOKEN_TYPES.ACCESS },
+      appConfig.JWT_SECRET,
+      {
+        expiresIn: `${appConfig.ACCESS_TOKEN_EXPIRE_MIN}m`,
+      },
+    );
 
-    return {
-      accessTokenKey,
-      refreshTokenKey,
-    };
-  }
-
-  private handleTokensGenerate({
-    userId,
-    userName,
-  }: TokenProps): TokensResponse {
-    const accessToken = sign({ userId, userName }, appConfig.JWT_SECRET, {
-      expiresIn: 60 * appConfig.ACCESS_TOKEN_EXPIRE_MIN,
-    });
-
-    const refreshToken = sign({ userId, userName }, appConfig.JWT_SECRET);
+    const refreshToken = sign(
+      { userId, type: TOKEN_TYPES.REFRESH },
+      appConfig.JWT_SECRET,
+      {
+        expiresIn: `${appConfig.REFRESH_TOKEN_EXPIRE_MIN}m`,
+      },
+    );
     return {
       accessToken,
       refreshToken,

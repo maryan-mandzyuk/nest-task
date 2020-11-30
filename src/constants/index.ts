@@ -6,3 +6,16 @@ export const ERROR_MESSAGES = {
   SEVER_ERROR: 'Server error',
   TOKEN_INVALID: 'Invalid token',
 };
+export const LOGS_PER_PAGE = 10;
+export const PRODUCTS_PER_PAGE = 10;
+
+export enum TOKEN_HEADER_KEY {
+  REFRESH = 'x-refresh-token',
+  ACCESS = 'authorization',
+}
+
+export enum TOKEN_TYPES {
+  ACCESS = 'access',
+  REFRESH = 'refresh',
+}
+export const USER_REFRESH_TOKEN_KEY = (userId) => `refreshToken_${userId}`;

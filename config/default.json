@@ -8,7 +8,9 @@
   },
   "appConfig": {
     "port": 3000,
-    "jwtSecret": "secret"
+    "jwtSecret": "secret",
+    "accessTokenExpireMin": 30,
+    "refreshTokenExpireMin": 90
   },
   "redisConfig": {
     "port": 6379,

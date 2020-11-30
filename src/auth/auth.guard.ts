@@ -8,24 +8,34 @@ import {
 import { verify } from 'jsonwebtoken';
 import { Observable } from 'rxjs';
 import { appConfig } from 'src/AppConfig';
-import { ERROR_MESSAGES } from 'src/constants';
+import { ERROR_MESSAGES, TOKEN_TYPES } from 'src/constants';
+import { ITokenPayload } from './auth.interfaces';
+import { AuthHelper } from './authHelper';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  constructor(private tokenType: TOKEN_TYPES) {}
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const request: Request = context.switchToHttp().getRequest();
-    const token = request.headers['authorization'];
-
     try {
-      const user = verify(token.replace('Bearer ', ''), appConfig.JWT_SECRET);
+      const request: Request = context.switchToHttp().getRequest();
+      const tokenHeaderKey = AuthHelper.getTokenHeaderKey(this.tokenType);
+      const token = AuthHelper.getTokenFromRequest(request, tokenHeaderKey);
 
-      request['user'] = user;
+      const tokenPayload = verify(token, appConfig.JWT_SECRET) as ITokenPayload;
+
+      if (tokenPayload.type !== this.tokenType) {
+        throw new HttpException(
+          ERROR_MESSAGES.TOKEN_INVALID,
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
       return true;
     } catch (e) {
       throw new HttpException(
-        ERROR_MESSAGES.TOKEN_INVALID,
+        { message: ERROR_MESSAGES.TOKEN_INVALID, error: e },
         HttpStatus.UNAUTHORIZED,
       );
     }

@@ -13,13 +13,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthHelper } from 'src/auth/authHelper';
+import { TOKEN_HEADER_KEY, TOKEN_TYPES } from 'src/constants';
 import { UsersService } from 'src/users/users.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { FindProductQueryDto } from './dto/find-froduct.dto';
+import { FindProductQueryDto } from './dto/find-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
-@UseGuards(AuthGuard)
+@UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
 @Controller('products')
 export class ProductsController {
   constructor(
@@ -32,7 +34,10 @@ export class ProductsController {
     @Request() req,
     @Query() query: FindProductQueryDto,
   ): Promise<Product[]> {
-    const { userId } = req.user;
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+
+    const { userId } = AuthHelper.decodeTokenPayload(token);
+
     return this.productsService.handleFindByUser(userId, { ...query });
   }
 
@@ -47,8 +52,15 @@ export class ProductsController {
     @Request() req,
   ): Promise<Product> {
     try {
-      const { userId } = req.user;
+      const token = AuthHelper.getTokenFromRequest(
+        req,
+        TOKEN_HEADER_KEY.ACCESS,
+      );
+
+      const { userId } = AuthHelper.decodeTokenPayload(token);
+
       const user = await this.usersService.handleFindById(userId);
+
       return this.productsService.handelCreate(createProductDto, user);
     } catch (e) {
       throw new HttpException(
@@ -64,7 +76,10 @@ export class ProductsController {
     @Param() params,
     @Request() req,
   ): Promise<Product> {
-    const { userId } = req.user;
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+
+    const { userId } = AuthHelper.decodeTokenPayload(token);
+
     return this.productsService.handleUpdate(
       params.id,
       userId,
@@ -73,8 +88,9 @@ export class ProductsController {
   }
 
   @Delete('/:id')
-  delete(@Param() params, @Request() req) {
-    const { userId } = req.user;
+  delete(@Param() params, @Request() req: Request) {
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+    const { userId } = AuthHelper.decodeTokenPayload(token);
     return this.productsService.handleDelete(params.id, userId);
   }
 }

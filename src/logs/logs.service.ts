@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { appConfig } from 'src/AppConfig';
+import { LOGS_PER_PAGE } from 'src/constants';
 import { Repository } from 'typeorm';
 import { FindLogsQueryDto } from './dto/find-logs.dto';
 import { Logs } from './logs.entity';
@@ -31,8 +31,8 @@ export class LogsService {
       .andWhere(endTime ? 'logs.createdAt < :endTime' : 'TRUE', {
         endTime,
       })
-      .skip(appConfig.LOGS_PER_PAGE * (page - 1))
-      .take(appConfig.LOGS_PER_PAGE)
+      .skip(LOGS_PER_PAGE * (page - 1))
+      .take(LOGS_PER_PAGE)
       .getMany();
 
     return logs;
