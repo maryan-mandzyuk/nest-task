@@ -6,3 +6,9 @@ export const ERROR_MESSAGES = {
   SEVER_ERROR: 'Server error',
   TOKEN_INVALID: 'Invalid token',
 };
+
+export const TOKEN_TYPE = {
+  ACCESS: 'access',
+  REFRESH: 'refresh',
+};
+export const USER_REFRESH_TOKEN_KEY = (userId) => `refreshToken_${userId}`;

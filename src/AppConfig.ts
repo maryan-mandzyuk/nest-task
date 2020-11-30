@@ -4,9 +4,10 @@ import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConne
 export const appConfig = {
   PORT: get('appConfig.port'),
   JWT_SECRET: get('appConfig.jwtSecret'),
-  LOGS_PER_PAGE: 10,
-  PRODUCTS_PER_PAGE: 10,
-  ACCESS_TOKEN_EXPIRE_MIN: 30,
+  LOGS_PER_PAGE: get('appConfig.logsPerPage'),
+  PRODUCTS_PER_PAGE: get('appConfig.productsPerPage'),
+  ACCESS_TOKEN_EXPIRE_MIN: get('appConfig.accessTokenExpireMin'),
+  REFRESH_TOKEN_EXPIRE_MIN: get('appConfig.refreshTokenExpireMin'),
 };
 
 export const dbConfig: PostgresConnectionOptions = {
