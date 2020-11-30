@@ -21,7 +21,6 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly redisService: RedisService,
-    private authHelper: AuthHelper,
   ) {}
 
   public async handleLogin(loginDto: LoginUserDto): Promise<TokensResponse> {
@@ -67,7 +66,7 @@ export class AuthService {
 
   public async refreshTokens(refreshToken: string): Promise<TokensResponse> {
     try {
-      const { userId } = this.authHelper.decodeTokenPayload(refreshToken);
+      const { userId } = AuthHelper.decodeTokenPayload(refreshToken);
 
       const refreshTokenKey = USER_REFRESH_TOKEN_KEY(userId);
 

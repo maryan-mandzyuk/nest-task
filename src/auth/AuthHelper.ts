@@ -4,7 +4,7 @@ import { TOKEN_HEADER_KEY, TOKEN_TYPES } from 'src/constants';
 import { ITokenPayload } from './auth.interfaces';
 
 export class AuthHelper {
-  public getTokenFromRequest(
+  static getTokenFromRequest(
     req: Request,
     tokenHeader: TOKEN_HEADER_KEY,
   ): string {
@@ -13,11 +13,11 @@ export class AuthHelper {
     return token;
   }
 
-  public decodeTokenPayload(token: string): ITokenPayload {
+  static decodeTokenPayload(token: string): ITokenPayload {
     return decode(token, appConfig.JWT_SECRET) as ITokenPayload;
   }
 
-  public getTokenHeaderKey(type: TOKEN_TYPES): TOKEN_HEADER_KEY {
+  static getTokenHeaderKey(type: TOKEN_TYPES): TOKEN_HEADER_KEY {
     switch (type) {
       case TOKEN_TYPES.ACCESS:
         return TOKEN_HEADER_KEY.ACCESS;

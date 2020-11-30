@@ -8,22 +8,16 @@ import { LogsService } from './logs.service';
 
 @Controller('logs')
 export class LogsController {
-  constructor(
-    private logsService: LogsService,
-    private authHelper: AuthHelper,
-  ) {}
+  constructor(private logsService: LogsService) {}
 
-  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS, new AuthHelper()))
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @Get('')
   findLogsByUser(
     @Request() req,
     @Query() query: FindLogsQueryDto,
   ): Promise<Logs[]> {
-    const token = this.authHelper.getTokenFromRequest(
-      req,
-      TOKEN_HEADER_KEY.ACCESS,
-    );
-    const { userId } = this.authHelper.decodeTokenPayload(token);
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+    const { userId } = AuthHelper.decodeTokenPayload(token);
     return this.logsService.handelFindByUser(userId, { ...query });
   }
 }

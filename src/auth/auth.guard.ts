@@ -14,17 +14,14 @@ import { AuthHelper } from './authHelper';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private tokenType: TOKEN_TYPES, private authHelper: AuthHelper) {}
+  constructor(private tokenType: TOKEN_TYPES) {}
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     try {
       const request: Request = context.switchToHttp().getRequest();
-      const tokenHeaderKey = this.authHelper.getTokenHeaderKey(this.tokenType);
-      const token = this.authHelper.getTokenFromRequest(
-        request,
-        tokenHeaderKey,
-      );
+      const tokenHeaderKey = AuthHelper.getTokenHeaderKey(this.tokenType);
+      const token = AuthHelper.getTokenFromRequest(request, tokenHeaderKey);
 
       const tokenPayload = verify(token, appConfig.JWT_SECRET) as ITokenPayload;
 

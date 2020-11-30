@@ -18,10 +18,7 @@ import { AuthHelper } from './authHelper';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private authHelper: AuthHelper,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Post('/login')
   async login(@Body() loginUserDto: LoginUserDto): Promise<TokensResponse> {
@@ -34,12 +31,9 @@ export class AuthController {
   }
 
   @Get('/refresh-token')
-  @UseGuards(new AuthGuard(TOKEN_TYPES.REFRESH, new AuthHelper()))
+  @UseGuards(new AuthGuard(TOKEN_TYPES.REFRESH))
   refresh(@Req() req: Request): Promise<TokensResponse> {
-    const token = this.authHelper.getTokenFromRequest(
-      req,
-      TOKEN_HEADER_KEY.REFRESH,
-    );
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.REFRESH);
     return this.authService.refreshTokens(token);
   }
 }

@@ -21,13 +21,12 @@ import { FindProductQueryDto } from './dto/find-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
-@UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS, new AuthHelper()))
+@UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
 @Controller('products')
 export class ProductsController {
   constructor(
     private productsService: ProductsService,
     private usersService: UsersService,
-    private authHelper: AuthHelper,
   ) {}
 
   @Get('/me')
@@ -35,12 +34,9 @@ export class ProductsController {
     @Request() req,
     @Query() query: FindProductQueryDto,
   ): Promise<Product[]> {
-    const token = this.authHelper.getTokenFromRequest(
-      req,
-      TOKEN_HEADER_KEY.ACCESS,
-    );
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
 
-    const { userId } = this.authHelper.decodeTokenPayload(token);
+    const { userId } = AuthHelper.decodeTokenPayload(token);
 
     return this.productsService.handleFindByUser(userId, { ...query });
   }
@@ -56,12 +52,12 @@ export class ProductsController {
     @Request() req,
   ): Promise<Product> {
     try {
-      const token = this.authHelper.getTokenFromRequest(
+      const token = AuthHelper.getTokenFromRequest(
         req,
         TOKEN_HEADER_KEY.ACCESS,
       );
 
-      const { userId } = this.authHelper.decodeTokenPayload(token);
+      const { userId } = AuthHelper.decodeTokenPayload(token);
 
       const user = await this.usersService.handleFindById(userId);
 
@@ -80,12 +76,9 @@ export class ProductsController {
     @Param() params,
     @Request() req,
   ): Promise<Product> {
-    const token = this.authHelper.getTokenFromRequest(
-      req,
-      TOKEN_HEADER_KEY.ACCESS,
-    );
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
 
-    const { userId } = this.authHelper.decodeTokenPayload(token);
+    const { userId } = AuthHelper.decodeTokenPayload(token);
 
     return this.productsService.handleUpdate(
       params.id,
@@ -96,11 +89,8 @@ export class ProductsController {
 
   @Delete('/:id')
   delete(@Param() params, @Request() req: Request) {
-    const token = this.authHelper.getTokenFromRequest(
-      req,
-      TOKEN_HEADER_KEY.ACCESS,
-    );
-    const { userId } = this.authHelper.decodeTokenPayload(token);
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+    const { userId } = AuthHelper.decodeTokenPayload(token);
     return this.productsService.handleDelete(params.id, userId);
   }
 }
