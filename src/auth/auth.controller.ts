@@ -36,4 +36,9 @@ export class AuthController {
     const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.REFRESH);
     return this.authService.refreshTokens(token);
   }
+
+  @Get('/confirm-email/:token')
+  confirmEmail() {
+    return true;
+  }
 }

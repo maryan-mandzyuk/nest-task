@@ -15,5 +15,11 @@
   "redisConfig": {
     "port": 6379,
     "host": "127.0.0.1"
+  },
+  "emailConfig": {
+    "email": "",
+    "password": "",
+    "host": "gmail.com",
+    "fromMessage": "incora-nest"
   }
 }

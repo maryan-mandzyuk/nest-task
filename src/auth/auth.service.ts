@@ -15,12 +15,14 @@ import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
 import { TokensResponse } from './auth.interfaces';
 import { AuthHelper } from './authHelper';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly redisService: RedisService,
+    private readonly mailerService: MailerService,
   ) {}
 
   public async handleLogin(loginDto: LoginUserDto): Promise<TokensResponse> {
@@ -32,6 +34,13 @@ export class AuthService {
         throw new HttpException(
           { message: ERROR_MESSAGES.USER_NOT_FOUND },
           HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (!user.isEmailConfirmed) {
+        throw new HttpException(
+          { message: ERROR_MESSAGES.EMAIL_NOT_CONFIRMED },
+          HttpStatus.UNAUTHORIZED,
         );
       }
 
@@ -100,22 +109,37 @@ export class AuthService {
   }
 
   public async handleCreate(userDto: CreateUserDto): Promise<User> {
-    const { userName, password } = userDto;
-    const user = await this.getUserByUserName({ userName });
+    try {
+      const { userName, password, email } = userDto;
+      const user = await this.getUserByUserName({ userName });
 
-    if (user) {
+      if (user) {
+        throw new HttpException(
+          { message: ERROR_MESSAGES.USER_NOT_UNIQUE },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const hashPass = await this.hashPassword(password);
+      const newUser = await this.userRepository.save({
+        ...userDto,
+        password: hashPass,
+      });
+
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Email confirmation',
+        text: 'Welcome',
+        html: '<p>WELCOME</p>',
+      });
+
+      return newUser;
+    } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.USER_NOT_UNIQUE },
+        { message: ERROR_MESSAGES.USER_NOT_UNIQUE, error: e },
         HttpStatus.BAD_REQUEST,
       );
     }
-
-    const hashPass = await this.hashPassword(password);
-
-    return await this.userRepository.save({
-      ...userDto,
-      password: hashPass,
-    });
   }
 
   private handleTokensGenerate(userId: string | number): TokensResponse {

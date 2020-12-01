@@ -5,6 +5,7 @@ export const ERROR_MESSAGES = {
   USER_NOT_UNIQUE: 'Username must be unique',
   SEVER_ERROR: 'Server error',
   TOKEN_INVALID: 'Invalid token',
+  EMAIL_NOT_CONFIRMED: 'Email not confirmed. Pleas confirm email!',
 };
 export const LOGS_PER_PAGE = 10;
 export const PRODUCTS_PER_PAGE = 10;

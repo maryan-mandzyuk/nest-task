@@ -28,3 +28,19 @@ export const redisConfig = {
   port: get('redisConfig.port'),
   host: get('redisConfig.host'),
 };
+
+export const emailData = {
+  email: get('emailConfig.email'),
+  password: get('emailConfig.password'),
+  host: get('emailConfig.host'),
+  fromMessage: get('emailConfig.fromMessage'),
+};
+
+export const emailTransport = `smtps://${emailData.email}:${emailData.password}@smtp.${emailData.host}`;
+
+export const emailConfig = {
+  transport: emailTransport,
+  defaults: {
+    from: `${emailData.fromMessage} <${emailData.email}>`,
+  },
+};
