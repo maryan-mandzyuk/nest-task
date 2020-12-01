@@ -122,7 +122,7 @@ export class AuthService {
         );
       }
 
-      const hashPass = await this.hashPassword(password);
+      const hashPass = await AuthHelper.hashPassword(password);
       const newUser = await this.userRepository.save({
         ...userDto,
         password: hashPass,
@@ -191,19 +191,6 @@ export class AuthService {
     );
 
     return emailToken;
-  }
-
-  private async hashPassword(password: string): Promise<string> {
-    try {
-      const salt = await genSalt(10);
-      const hashPass = await hashSync(password, salt);
-      return hashPass;
-    } catch (e) {
-      throw new HttpException(
-        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
   }
 
   private async getUserByUserName(query): Promise<User> {

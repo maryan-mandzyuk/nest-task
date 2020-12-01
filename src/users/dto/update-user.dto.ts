@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger/dist/decorators';
-import { IsEmail, Length } from 'class-validator';
+import { Length } from 'class-validator';
 
-export class CreateUserDto {
+export class UpdateUserDto {
   @ApiProperty({
     minLength: 2,
     maxLength: 25,
@@ -22,15 +22,4 @@ export class CreateUserDto {
   })
   @Length(5, 25)
   userName: string;
-
-  @ApiProperty()
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({
-    minLength: 5,
-    maxLength: 25,
-  })
-  @Length(5, 25)
-  password: string;
 }

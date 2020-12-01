@@ -6,6 +6,7 @@ export const ERROR_MESSAGES = {
   SERVER_ERROR: 'Server error',
   TOKEN_INVALID: 'Invalid token',
   EMAIL_NOT_CONFIRMED: 'Email not confirmed. Pleas confirm email!',
+  BAD_REQUEST: 'Bad request',
 };
 export const LOGS_PER_PAGE = 10;
 export const PRODUCTS_PER_PAGE = 10;
