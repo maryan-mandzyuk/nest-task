@@ -7,38 +7,63 @@ import {
   UseGuards,
   Param,
 } from '@nestjs/common';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TOKEN_KEY, TOKEN_TYPES } from 'src/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { User } from 'src/users/user.entity';
 import { AuthGuard } from './auth.guard';
-import { CustomRequest, TokensResponse } from './auth.interfaces';
+import { CustomRequest, ITokensResponse } from './auth.interfaces';
 import { AuthService } from './auth.service';
 import { AuthHelper } from './authHelper';
+import { TokensResponse } from './TokensResponse';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/login')
-  async login(@Body() loginUserDto: LoginUserDto): Promise<TokensResponse> {
+  @ApiBody({
+    type: LoginUserDto,
+  })
+  @ApiResponse({
+    status: 200,
+    type: TokensResponse,
+  })
+  async login(@Body() loginUserDto: LoginUserDto): Promise<ITokensResponse> {
     return this.authService.handleLogin(loginUserDto);
   }
 
   @Post('/register')
+  @ApiBody({
+    type: CreateUserDto,
+  })
+  @ApiResponse({
+    type: User,
+    status: 200,
+  })
   create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.authService.handleCreate(createUserDto);
   }
 
   @Get('/refresh-token')
   @UseGuards(new AuthGuard(TOKEN_TYPES.REFRESH))
-  refresh(@Req() req: CustomRequest): Promise<TokensResponse> {
+  @ApiResponse({
+    status: 200,
+    type: TokensResponse,
+  })
+  refresh(@Req() req: CustomRequest): Promise<ITokensResponse> {
     const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.REFRESH);
     return this.authService.refreshTokens(token);
   }
 
-  @UseGuards(new AuthGuard(TOKEN_TYPES.EMAIL))
   @Get('/confirm-email/:emailToken')
+  @ApiParam({ type: 'string', name: 'emailToken' })
+  @ApiResponse({
+    status: 200,
+    type: TokensResponse,
+  })
   confirmEmail(@Param() params): Promise<string> {
     return this.authService.handleEmailConfirmation(params.emailToken);
   }

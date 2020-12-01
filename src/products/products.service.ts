@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/users/user.entity';
-import { ERROR_MESSAGES, PRODUCTS_PER_PAGE } from 'src/constants';
+import { ERROR_MESSAGES, ORDER, PRODUCTS_PER_PAGE } from 'src/constants';
 import { FindProductQueryDto } from './dto/find-product.dto';
 @Injectable()
 export class ProductsService {
@@ -16,7 +16,7 @@ export class ProductsService {
 
   public async handleFindByUser(
     userId,
-    { orderPrice = 'ASC', page = 1, searchTerm }: FindProductQueryDto,
+    { orderPrice = ORDER.ASC, page = 1, searchTerm }: FindProductQueryDto,
   ): Promise<Product[]> {
     return this.productRepository
       .createQueryBuilder('product')

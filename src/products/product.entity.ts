@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Logs } from 'src/logs/logs.entity';
 import { User } from 'src/users/user.entity';
 import {
@@ -11,21 +12,27 @@ import {
 
 @Entity()
 export class Product {
+  @ApiProperty()
   @PrimaryGeneratedColumn()
   id: string;
 
+  @ApiProperty()
   @Column()
   name: string;
 
+  @ApiProperty()
   @Column({ nullable: true })
   description: string;
 
+  @ApiProperty()
   @Column()
   price: string;
 
+  @ApiProperty()
   @Column({ type: 'timestamp', default: new Date() })
   createdAt: string;
 
+  @ApiProperty()
   @Column({ default: false })
   isDeleted: boolean;
 

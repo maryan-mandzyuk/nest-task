@@ -14,7 +14,7 @@ import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
-import { TokensResponse } from './auth.interfaces';
+import { ITokensResponse } from './auth.interfaces';
 import { AuthHelper } from './authHelper';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -26,7 +26,7 @@ export class AuthService {
     private readonly mailerService: MailerService,
   ) {}
 
-  public async handleLogin(loginDto: LoginUserDto): Promise<TokensResponse> {
+  public async handleLogin(loginDto: LoginUserDto): Promise<ITokensResponse> {
     try {
       const { userName, password } = loginDto;
       const user = await this.getUserByUserName({ userName });
@@ -74,7 +74,7 @@ export class AuthService {
     }
   }
 
-  public async refreshTokens(refreshToken: string): Promise<TokensResponse> {
+  public async refreshTokens(refreshToken: string): Promise<ITokensResponse> {
     try {
       const { userId } = AuthHelper.decodeTokenPayload(refreshToken);
 
@@ -161,7 +161,7 @@ export class AuthService {
     }
   }
 
-  private handleTokensGenerate(userId: string | number): TokensResponse {
+  private handleTokensGenerate(userId: string | number): ITokensResponse {
     const accessToken = sign(
       { userId, type: TOKEN_TYPES.ACCESS },
       appConfig.JWT_SECRET,

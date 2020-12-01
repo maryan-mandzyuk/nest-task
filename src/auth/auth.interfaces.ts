@@ -1,6 +1,6 @@
 import { TOKEN_TYPES } from 'src/constants';
 
-export interface TokensResponse {
+export interface ITokensResponse {
   accessToken: string;
   refreshToken: string;
 }
