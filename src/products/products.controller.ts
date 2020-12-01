@@ -13,8 +13,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { CustomRequest } from 'src/auth/auth.interfaces';
 import { AuthHelper } from 'src/auth/authHelper';
-import { TOKEN_HEADER_KEY, TOKEN_TYPES } from 'src/constants';
+import { TOKEN_KEY, TOKEN_TYPES } from 'src/constants';
 import { UsersService } from 'src/users/users.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductQueryDto } from './dto/find-product.dto';
@@ -34,7 +35,7 @@ export class ProductsController {
     @Request() req,
     @Query() query: FindProductQueryDto,
   ): Promise<Product[]> {
-    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
 
     const { userId } = AuthHelper.decodeTokenPayload(token);
 
@@ -52,10 +53,7 @@ export class ProductsController {
     @Request() req,
   ): Promise<Product> {
     try {
-      const token = AuthHelper.getTokenFromRequest(
-        req,
-        TOKEN_HEADER_KEY.ACCESS,
-      );
+      const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
 
       const { userId } = AuthHelper.decodeTokenPayload(token);
 
@@ -76,7 +74,7 @@ export class ProductsController {
     @Param() params,
     @Request() req,
   ): Promise<Product> {
-    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
 
     const { userId } = AuthHelper.decodeTokenPayload(token);
 
@@ -88,8 +86,8 @@ export class ProductsController {
   }
 
   @Delete('/:id')
-  delete(@Param() params, @Request() req: Request) {
-    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+  delete(@Param() params, @Request() req: CustomRequest) {
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
     const { userId } = AuthHelper.decodeTokenPayload(token);
     return this.productsService.handleDelete(params.id, userId);
   }

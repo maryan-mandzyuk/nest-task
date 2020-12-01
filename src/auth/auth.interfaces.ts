@@ -9,3 +9,9 @@ export interface ITokenPayload {
   type: TOKEN_TYPES;
   userId: string;
 }
+
+export interface CustomRequest extends Request {
+  params: {
+    emailToken: string;
+  };
+}

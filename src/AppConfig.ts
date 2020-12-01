@@ -6,6 +6,7 @@ export const appConfig = {
   JWT_SECRET: get('appConfig.jwtSecret'),
   ACCESS_TOKEN_EXPIRE_MIN: get('appConfig.accessTokenExpireMin'),
   REFRESH_TOKEN_EXPIRE_MIN: get('appConfig.refreshTokenExpireMin'),
+  EMAIL_TOKEN_EXPIRE_DAY: get('appConfig.emailTokenExpireDay'),
 };
 
 export const dbConfig: PostgresConnectionOptions = {
@@ -34,6 +35,10 @@ export const emailData = {
   password: get('emailConfig.password'),
   host: get('emailConfig.host'),
   fromMessage: get('emailConfig.fromMessage'),
+  confirmUrl: get('emailConfig.confirmUrl'),
+  messageSubject: get('emailConfig.messageSubject'),
+  messageText: get('emailConfig.messageText'),
+  confirmationMessage: get('emailConfig.confirmationMessage'),
 };
 
 export const emailTransport = `smtps://${emailData.email}:${emailData.password}@smtp.${emailData.host}`;

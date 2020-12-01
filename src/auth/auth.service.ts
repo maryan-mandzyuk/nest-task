@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compareSync, genSalt, hashSync } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
-import { appConfig } from 'src/AppConfig';
+import { appConfig, emailData } from 'src/AppConfig';
 import {
   ERROR_MESSAGES,
   TOKEN_TYPES,
@@ -67,7 +67,7 @@ export class AuthService {
       };
     } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.SEVER_ERROR, error: e },
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -102,7 +102,7 @@ export class AuthService {
       };
     } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.SEVER_ERROR, error: e },
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -111,6 +111,7 @@ export class AuthService {
   public async handleCreate(userDto: CreateUserDto): Promise<User> {
     try {
       const { userName, password, email } = userDto;
+
       const user = await this.getUserByUserName({ userName });
 
       if (user) {
@@ -126,17 +127,34 @@ export class AuthService {
         password: hashPass,
       });
 
+      const emailToken = this.handleEmailTokenGenerate(newUser.id);
+
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Email confirmation',
-        text: 'Welcome',
-        html: '<p>WELCOME</p>',
+        subject: emailData.messageSubject,
+        text: emailData.messageText,
+        html: `<p><a href="${emailData.confirmUrl}${emailToken}">Click here to confirm email</a></p>`,
       });
 
       return newUser;
     } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.USER_NOT_UNIQUE, error: e },
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  public async handleEmailConfirmation(emailToken: string): Promise<string> {
+    try {
+      const { userId } = AuthHelper.decodeTokenPayload(emailToken);
+      const user = await this.userRepository.findOneOrFail(userId);
+      user.isEmailConfirmed = true;
+      await this.userRepository.save(user);
+      return emailData.confirmationMessage;
+    } catch (e) {
+      throw new HttpException(
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -164,6 +182,16 @@ export class AuthService {
     };
   }
 
+  private handleEmailTokenGenerate(userId: number): string {
+    const emailToken = sign(
+      { userId, type: TOKEN_TYPES.EMAIL },
+      appConfig.JWT_SECRET,
+      { expiresIn: `${appConfig.EMAIL_TOKEN_EXPIRE_DAY}d` },
+    );
+
+    return emailToken;
+  }
+
   private async hashPassword(password: string): Promise<string> {
     try {
       const salt = await genSalt(10);
@@ -171,7 +199,7 @@ export class AuthService {
       return hashPass;
     } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.SEVER_ERROR, error: e },
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
