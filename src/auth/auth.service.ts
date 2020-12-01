@@ -4,6 +4,7 @@ import { compareSync, genSalt, hashSync } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 import { appConfig, emailData } from 'src/AppConfig';
 import {
+  EMAIL_HTML_HANDLER,
   ERROR_MESSAGES,
   TOKEN_TYPES,
   USER_REFRESH_TOKEN_KEY,
@@ -133,7 +134,7 @@ export class AuthService {
         to: email,
         subject: emailData.messageSubject,
         text: emailData.messageText,
-        html: `<p><a href="${emailData.confirmUrl}${emailToken}">Click here to confirm email</a></p>`,
+        html: EMAIL_HTML_HANDLER(emailData.confirmUrl, emailToken),
       });
 
       return newUser;

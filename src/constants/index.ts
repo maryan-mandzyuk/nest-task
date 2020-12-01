@@ -22,3 +22,6 @@ export enum TOKEN_TYPES {
   EMAIL = 'email',
 }
 export const USER_REFRESH_TOKEN_KEY = (userId) => `refreshToken_${userId}`;
+
+export const EMAIL_HTML_HANDLER = (url: string, token: string) =>
+  `<p><a href="${url}${token}">Click here to confirm email</a></p>`;
