@@ -19,7 +19,7 @@
   },
   "emailConfig": {
     "email": "mandzukm7@gmail.com",
-    "password": "rp079vlrp079vl",
+    "password": "",
     "host": "gmail.com",
     "fromMessage": "incora-nest",
     "confirmUrl": "http://localhost:3000/auth/confirm-email/",
