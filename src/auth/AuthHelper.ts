@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { genSalt, hashSync } from 'bcrypt';
-import { decode } from 'jsonwebtoken';
+import { decode, verify } from 'jsonwebtoken';
 import { appConfig } from 'src/AppConfig';
 import { ERROR_MESSAGES, TOKEN_KEY, TOKEN_TYPES } from 'src/constants';
 import { CustomRequest, ITokenPayload } from './auth.interfaces';
@@ -12,7 +12,6 @@ export class AuthHelper {
       return emailToken;
     } else {
       const authHeader: string = req.headers[tokenKey];
-
       const token: string = authHeader.replace('Bearer ', '');
       return token;
     }
@@ -20,6 +19,10 @@ export class AuthHelper {
 
   static decodeTokenPayload(token: string): ITokenPayload {
     return decode(token, appConfig.JWT_SECRET) as ITokenPayload;
+  }
+
+  static verifyAndDecodeToken(token: string): ITokenPayload {
+    return verify(token, appConfig.JWT_SECRET) as ITokenPayload;
   }
 
   static async hashPassword(password: string): Promise<string> {
@@ -43,6 +46,8 @@ export class AuthHelper {
         return TOKEN_KEY.REFRESH;
       case TOKEN_TYPES.EMAIL:
         return TOKEN_KEY.EMAIL;
+      case TOKEN_TYPES.RESET:
+        return TOKEN_KEY.RESET;
       default:
         break;
     }

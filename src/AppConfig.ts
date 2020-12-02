@@ -7,6 +7,7 @@ export const appConfig = {
   ACCESS_TOKEN_EXPIRE_MIN: get('appConfig.accessTokenExpireMin'),
   REFRESH_TOKEN_EXPIRE_MIN: get('appConfig.refreshTokenExpireMin'),
   EMAIL_TOKEN_EXPIRE_DAY: get('appConfig.emailTokenExpireDay'),
+  RESET_TOKEN_EXPIRE_DAY: get('appConfig.resetTokenExpireDay'),
 };
 
 export const dbConfig: PostgresConnectionOptions = {
@@ -36,9 +37,11 @@ export const emailData = {
   host: get('emailConfig.host'),
   fromMessage: get('emailConfig.fromMessage'),
   confirmUrl: get('emailConfig.confirmUrl'),
-  messageSubject: get('emailConfig.messageSubject'),
-  messageText: get('emailConfig.messageText'),
+  confirmMessageSubject: get('emailConfig.confirmMessageSubject'),
+  confirmMessageText: get('emailConfig.confirmMessageText'),
   confirmationMessage: get('emailConfig.confirmationMessage'),
+  resetMessageSubject: get('emailConfig.resetMessageSubject'),
+  resetMessageText: get('emailConfig.resetMessageText'),
 };
 
 export const emailTransport = `smtps://${emailData.email}:${emailData.password}@smtp.${emailData.host}`;

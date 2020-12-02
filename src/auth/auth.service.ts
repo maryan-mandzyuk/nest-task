@@ -4,8 +4,10 @@ import { compareSync } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 import { appConfig, emailData } from 'src/AppConfig';
 import {
-  EMAIL_HTML_HANDLER,
+  CONFIRM_EMAIL_HTML_HANDLER,
   ERROR_MESSAGES,
+  RESET_HTML_HANDLER,
+  SUCCESS_MESSAGES,
   TOKEN_TYPES,
   USER_REFRESH_TOKEN_KEY,
 } from 'src/constants';
@@ -17,6 +19,7 @@ import { RedisService } from 'nestjs-redis';
 import { ITokensResponse } from './auth.interfaces';
 import { AuthHelper } from './authHelper';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -128,13 +131,16 @@ export class AuthService {
         password: hashPass,
       });
 
-      const emailToken = this.handleEmailTokenGenerate(newUser.id);
+      const emailToken = this.handleTokenGenerateByType(
+        newUser.id,
+        TOKEN_TYPES.EMAIL,
+      );
 
       await this.mailerService.sendMail({
         to: email,
-        subject: emailData.messageSubject,
-        text: emailData.messageText,
-        html: EMAIL_HTML_HANDLER(emailData.confirmUrl, emailToken),
+        subject: emailData.confirmMessageSubject,
+        text: emailData.confirmMessageText,
+        html: CONFIRM_EMAIL_HTML_HANDLER(emailData.confirmUrl, emailToken),
       });
 
       return newUser;
@@ -153,6 +159,55 @@ export class AuthService {
       user.isEmailConfirmed = true;
       await this.userRepository.save(user);
       return emailData.confirmationMessage;
+    } catch (e) {
+      throw new HttpException(
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  public async handelPasswordResetRequest(email: string): Promise<string> {
+    try {
+      const user = await this.userRepository.findOneOrFail({
+        email,
+      });
+
+      const resetToken = this.handleTokenGenerateByType(
+        user.id,
+        TOKEN_TYPES.RESET,
+      );
+
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: emailData.confirmMessageSubject,
+        text: emailData.confirmMessageText,
+        html: RESET_HTML_HANDLER(resetToken),
+      });
+
+      return SUCCESS_MESSAGES.RESET_EMAIL_MESSAGE;
+    } catch (e) {
+      throw new HttpException(
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  public async handlePasswordReset(
+    token: string,
+    resetDto: ResetPasswordDto,
+  ): Promise<string> {
+    try {
+      const { userId } = AuthHelper.decodeTokenPayload(token);
+      const user = await this.userRepository.findOneOrFail(userId);
+
+      const hashPass = await AuthHelper.hashPassword(resetDto.newPassword);
+      await this.userRepository.save({
+        ...user,
+        password: hashPass,
+      });
+      return SUCCESS_MESSAGES.RESET_PASS;
     } catch (e) {
       throw new HttpException(
         { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
@@ -183,12 +238,10 @@ export class AuthService {
     };
   }
 
-  private handleEmailTokenGenerate(userId: number): string {
-    const emailToken = sign(
-      { userId, type: TOKEN_TYPES.EMAIL },
-      appConfig.JWT_SECRET,
-      { expiresIn: `${appConfig.EMAIL_TOKEN_EXPIRE_DAY}d` },
-    );
+  private handleTokenGenerateByType(userId: number, type: TOKEN_TYPES): string {
+    const emailToken = sign({ userId, type }, appConfig.JWT_SECRET, {
+      expiresIn: `${appConfig.EMAIL_TOKEN_EXPIRE_DAY}d`,
+    });
 
     return emailToken;
   }

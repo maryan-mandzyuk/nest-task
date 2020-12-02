@@ -5,11 +5,9 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { verify } from 'jsonwebtoken';
 import { Observable } from 'rxjs';
-import { appConfig } from 'src/AppConfig';
 import { ERROR_MESSAGES, TOKEN_TYPES } from 'src/constants';
-import { CustomRequest, ITokenPayload } from './auth.interfaces';
+import { CustomRequest } from './auth.interfaces';
 import { AuthHelper } from './authHelper';
 
 @Injectable()
@@ -25,7 +23,7 @@ export class AuthGuard implements CanActivate {
 
       const tokenHeaderKey = AuthHelper.getTokenHeaderKey(this.tokenType);
       const token = AuthHelper.getTokenFromRequest(request, tokenHeaderKey);
-      const tokenPayload = verify(token, appConfig.JWT_SECRET) as ITokenPayload;
+      const tokenPayload = AuthHelper.verifyAndDecodeToken(token);
 
       if (tokenPayload.type !== this.tokenType) {
         throw new HttpException(

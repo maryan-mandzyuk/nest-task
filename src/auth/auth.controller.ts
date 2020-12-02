@@ -16,6 +16,7 @@ import { AuthGuard } from './auth.guard';
 import { CustomRequest, ITokensResponse } from './auth.interfaces';
 import { AuthService } from './auth.service';
 import { AuthHelper } from './authHelper';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TokensResponse } from './TokensResponse';
 
 @ApiTags('auth')
@@ -66,5 +67,30 @@ export class AuthController {
   })
   confirmEmail(@Param() params): Promise<string> {
     return this.authService.handleEmailConfirmation(params.emailToken);
+  }
+
+  @Get('/resetPassword/:email')
+  @ApiParam({ type: 'string', name: 'email' })
+  @ApiResponse({
+    status: 200,
+  })
+  requestForPasswordReset(@Param() params): Promise<string> {
+    return this.authService.handelPasswordResetRequest(params.email);
+  }
+
+  @Post('/resetPassword')
+  @UseGuards(new AuthGuard(TOKEN_TYPES.RESET))
+  @ApiBody({
+    type: ResetPasswordDto,
+  })
+  @ApiResponse({
+    status: 200,
+  })
+  resetPassword(
+    @Body() resetDto: ResetPasswordDto,
+    @Req() req: CustomRequest,
+  ): Promise<string> {
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.RESET);
+    return this.authService.handlePasswordReset(token, resetDto);
   }
 }
