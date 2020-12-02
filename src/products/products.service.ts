@@ -39,7 +39,10 @@ export class ProductsService {
     productDto: CreateProductDto,
     user: User,
   ): Promise<Product> {
-    return this.productRepository.save({ ...productDto, user });
+    return this.productRepository.save({
+      ...productDto,
+      user,
+    });
   }
 
   public async handleDelete(id: number, userId: string): Promise<Product> {

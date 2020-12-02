@@ -9,6 +9,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
+import { ProductPropertyDto } from './dto/product-property.dto';
 
 @Entity()
 export class Product {
@@ -35,6 +36,10 @@ export class Product {
   @ApiProperty()
   @Column({ default: false })
   isDeleted: boolean;
+
+  @ApiProperty({ type: () => [ProductPropertyDto] })
+  @Column('json')
+  property: ProductPropertyDto[];
 
   @ManyToOne(() => User, (user) => user.products)
   @JoinColumn({ name: 'user_id' })

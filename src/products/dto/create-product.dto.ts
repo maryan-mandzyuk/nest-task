@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, Length } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsOptional,
+  Length,
+  ValidateNested,
+} from 'class-validator';
+import { ProductPropertyDto } from './product-property.dto';
 export class CreateProductDto {
   @ApiProperty({
     minLength: 2,
@@ -21,4 +30,12 @@ export class CreateProductDto {
   })
   @Length(2, 25)
   price: string;
+
+  @ApiProperty({ type: () => [ProductPropertyDto], minItems: 1, maxItems: 250 })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @ArrayMaxSize(250)
+  @Type(() => ProductPropertyDto)
+  property: ProductPropertyDto[];
 }

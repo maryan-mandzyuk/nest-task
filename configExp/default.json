@@ -9,7 +9,7 @@
   "appConfig": {
     "port": 3000,
     "jwtSecret": "secret",
-    "accessTokenExpireMin": 30,
+    "accessTokenExpireMin": 120,
     "refreshTokenExpireMin": 90,
     "emailTokenExpireDay": 2,
     "resetTokenExpireDay": 1
