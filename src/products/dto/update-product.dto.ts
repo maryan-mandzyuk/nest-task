@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsOptional,
@@ -36,7 +37,7 @@ export class UpdateProductDto {
   @IsArray()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
-  @ArrayMinSize(250)
+  @ArrayMaxSize(250)
   @Type(() => ProductPropertyDto)
   property: ProductPropertyDto[];
 }
