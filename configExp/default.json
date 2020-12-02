@@ -11,7 +11,8 @@
     "jwtSecret": "secret",
     "accessTokenExpireMin": 30,
     "refreshTokenExpireMin": 90,
-    "emailTokenExpireDay": 2
+    "emailTokenExpireDay": 2,
+    "resetTokenExpireDay": 1
   },
   "redisConfig": {
     "port": 6379,
@@ -23,8 +24,10 @@
     "host": "gmail.com",
     "fromMessage": "incora-nest",
     "confirmUrl": "http://localhost:3000/auth/confirm-email/",
-    "messageSubject": "Email confirmation",
-    "messageText": "Welcome",
-    "confirmationMessage": "Email successfully confirmed!"
+    "confirmMessageSubject": "Email confirmation",
+    "confirmMessageText": "Welcome",
+    "confirmationMessage": "Email successfully confirmed!",
+    "resetMessageSubject": "Reset password",
+    "resetMessageText": "Token for reset your password:"
   }
 }
