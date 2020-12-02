@@ -26,7 +26,10 @@ export class UsersService {
     try {
       const user = await this.userRepository.findOneOrFail(id);
 
-      return this.userRepository.save({ ...user, ...userDto });
+      return this.userRepository.save({
+        ...user,
+        ...userDto,
+      });
     } catch (e) {
       throw new HttpException(
         { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
@@ -41,7 +44,7 @@ export class UsersService {
   ): Promise<User> {
     try {
       const user = await this.userRepository.findOneOrFail(id);
-      const isPasswordEqual = compare(userDto.oldPassword, user.password);
+      const isPasswordEqual = await compare(userDto.oldPassword, user.password);
 
       if (!isPasswordEqual) {
         throw new HttpException(

@@ -12,7 +12,6 @@ export class AuthHelper {
       return emailToken;
     } else {
       const authHeader: string = req.headers[tokenKey];
-      console.log(req.headers);
 
       const token: string = authHeader.replace('Bearer ', '');
       return token;

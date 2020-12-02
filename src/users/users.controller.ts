@@ -1,5 +1,19 @@
-import { Controller, Delete, Get, Param, Put, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ID_PARAM, TOKEN_TYPES } from 'src/constants';
 import { DeleteResult } from 'typeorm';
@@ -35,23 +49,25 @@ export class UsersController {
 
   @Put('/:id')
   @ApiParam(ID_PARAM)
+  @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
     status: 200,
     type: User,
   })
-  update(@Param() params, userDto: UpdateUserDto): Promise<User> {
+  update(@Param() params, @Body() userDto: UpdateUserDto): Promise<User> {
     return this.usersService.handleUserUpdate(params.id, userDto);
   }
 
   @Put('/:id/password')
   @ApiParam(ID_PARAM)
+  @ApiBody({ type: UpdatePasswordUserDto })
   @ApiResponse({
     status: 200,
     type: User,
   })
   updatePassword(
     @Param() params,
-    userDto: UpdatePasswordUserDto,
+    @Body() userDto: UpdatePasswordUserDto,
   ): Promise<User> {
     return this.usersService.handlePasswordUpdate(params.id, userDto);
   }

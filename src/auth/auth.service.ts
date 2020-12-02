@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { compareSync, genSalt, hashSync } from 'bcrypt';
+import { compareSync } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 import { appConfig, emailData } from 'src/AppConfig';
 import {

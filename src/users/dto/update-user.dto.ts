@@ -6,20 +6,20 @@ export class UpdateUserDto {
     minLength: 2,
     maxLength: 25,
   })
-  @Length(5, 25)
+  @Length(2, 25)
   firstName: string;
 
   @ApiProperty({
     minLength: 2,
     maxLength: 25,
   })
-  @Length(5, 25)
+  @Length(2, 25)
   lastName: string;
 
   @ApiProperty({
-    minLength: 5,
+    minLength: 4,
     maxLength: 25,
   })
-  @Length(5, 25)
+  @Length(4, 25)
   userName: string;
 }

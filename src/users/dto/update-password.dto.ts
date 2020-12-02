@@ -3,14 +3,14 @@ import { Length } from 'class-validator';
 
 export class UpdatePasswordUserDto {
   @ApiProperty({
-    minLength: 2,
+    minLength: 5,
     maxLength: 25,
   })
   @Length(5, 25)
   oldPassword: string;
 
   @ApiProperty({
-    minLength: 2,
+    minLength: 5,
     maxLength: 25,
   })
   @Length(5, 25)
