@@ -10,22 +10,30 @@ import {
   Put,
   Query,
   Request,
+  Response,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger/dist';
+import { Response as ExpressResponse } from 'express';
+import { appConfig } from 'src/AppConfig';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CustomRequest } from 'src/auth/auth.interfaces';
 import { AuthHelper } from 'src/auth/authHelper';
 import { ID_PARAM, TOKEN_KEY, TOKEN_TYPES } from 'src/constants';
 import { UsersService } from 'src/users/users.service';
+import { ApiFile } from './decorators/apiFile.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductQueryDto } from './dto/find-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -54,10 +62,36 @@ export class ProductsController {
     @Query() query: FindProductQueryDto,
   ): Promise<Product[]> {
     const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
-
     const { userId } = AuthHelper.decodeTokenPayload(token);
 
     return this.productsService.handleFindByUser(userId, { ...query });
+  }
+
+  @Get('/export')
+  @ApiQuery({
+    type: FindProductQueryDto,
+  })
+  exportCsv(
+    @Request() req,
+    @Query() query: FindProductQueryDto,
+    @Response() res,
+  ): Promise<ExpressResponse> {
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
+    const { userId } = AuthHelper.decodeTokenPayload(token);
+    return this.productsService.handleCsvExport(userId, res, { ...query });
+  }
+
+  @Post('/import')
+  @ApiConsumes('multipart/form-data')
+  @ApiFile(appConfig.PRODUCTS_IMPORT_FILE)
+  @UseInterceptors(FileInterceptor(appConfig.PRODUCTS_IMPORT_FILE))
+  async importCsv(@Request() req, @UploadedFile() file): Promise<void> {
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
+
+    const { userId } = AuthHelper.decodeTokenPayload(token);
+
+    const user = await this.usersService.handleFindById(userId);
+    this.productsService.handelCsvImport(user, file);
   }
 
   @Get('/:id')

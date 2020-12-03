@@ -12,7 +12,9 @@
     "accessTokenExpireMin": 120,
     "refreshTokenExpireMin": 90,
     "emailTokenExpireDay": 2,
-    "resetTokenExpireDay": 1
+    "resetTokenExpireDay": 1,
+    "exportProductsFileName": "products.csv",
+    "importProductsFileName": "file"
   },
   "redisConfig": {
     "port": 6379,

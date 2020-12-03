@@ -7,6 +7,9 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { User } from 'src/users/user.entity';
 import { ERROR_MESSAGES, ORDER, PRODUCTS_PER_PAGE } from 'src/constants';
 import { FindProductQueryDto } from './dto/find-product.dto';
+import { write, parse } from 'fast-csv';
+import { Response } from 'express';
+import { appConfig } from 'src/AppConfig';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -15,7 +18,7 @@ export class ProductsService {
   ) {}
 
   public async handleFindByUser(
-    userId,
+    userId: string,
     { orderPrice = ORDER.ASC, page = 1, searchTerm }: FindProductQueryDto,
   ): Promise<Product[]> {
     return this.productRepository
@@ -33,6 +36,52 @@ export class ProductsService {
 
   public handleFindById(id: number): Promise<Product> {
     return this.productRepository.findOneOrFail(id);
+  }
+
+  public async handleCsvExport(
+    userId: string,
+    res: Response,
+    { orderPrice = ORDER.ASC, page = 1 }: FindProductQueryDto,
+  ): Promise<Response> {
+    const products = await this.productRepository.query(`
+      SELECT product.name, description, price, "createdAt" , string_agg(prop.name || ': ' || prop.value, ', ') as property
+      FROM product, json_to_recordset(product.property) AS prop("name" text, "value" text)
+      WHERE user_id = ${userId}
+      GROUP BY id
+      ORDER BY price ${orderPrice}
+      LIMIT ${PRODUCTS_PER_PAGE} OFFSET ${PRODUCTS_PER_PAGE * (page - 1)};
+    `);
+
+    res.attachment(appConfig.PRODUCTS_EXPORT_FILE);
+    return write(products, { headers: true }).pipe(res);
+  }
+
+  public async handelCsvImport(user: User, file: any): Promise<void> {
+    try {
+      const stream = parse({ headers: true }).on('data', (row) => {
+        const propertyArray = row.property
+          .split(',')
+          .map((el: string) => el.split(':'));
+
+        const propertyArrayOfJson = propertyArray.reduce(
+          (acc, curr) => [...acc, { ['name']: curr[0], ['value']: curr[1] }],
+          [],
+        );
+
+        this.productRepository.save({
+          ...row,
+          property: propertyArrayOfJson,
+          user,
+        });
+      });
+      stream.write(file.buffer);
+      stream.end();
+    } catch (e) {
+      throw new HttpException(
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   public handelCreate(

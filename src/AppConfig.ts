@@ -8,6 +8,8 @@ export const appConfig = {
   REFRESH_TOKEN_EXPIRE_MIN: get('appConfig.refreshTokenExpireMin'),
   EMAIL_TOKEN_EXPIRE_DAY: get('appConfig.emailTokenExpireDay'),
   RESET_TOKEN_EXPIRE_DAY: get('appConfig.resetTokenExpireDay'),
+  PRODUCTS_EXPORT_FILE: get('appConfig.exportProductsFileName'),
+  PRODUCTS_IMPORT_FILE: get('appConfig.importProductsFileName'),
 };
 
 export const dbConfig: PostgresConnectionOptions = {
