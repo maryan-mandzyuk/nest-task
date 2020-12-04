@@ -15,7 +15,7 @@ import { ProductPropertyDto } from './dto/product-property.dto';
 export class Product {
   @ApiProperty()
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @ApiProperty()
   @Column()

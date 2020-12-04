@@ -43,7 +43,12 @@ export class UsersService {
     userDto: UpdatePasswordUserDto,
   ): Promise<User> {
     try {
-      const user = await this.userRepository.findOneOrFail(id);
+      const user = await this.userRepository
+        .createQueryBuilder('user')
+        .addSelect('user.password')
+        .where({ id })
+        .getOneOrFail();
+
       const isPasswordEqual = await compare(userDto.oldPassword, user.password);
 
       if (!isPasswordEqual) {

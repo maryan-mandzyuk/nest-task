@@ -33,6 +33,7 @@ export class AuthService {
     try {
       const { userName, password } = loginDto;
       const user = await this.getUserByUserName({ userName });
+      console.log(user);
 
       if (!user) {
         throw new HttpException(
@@ -247,6 +248,10 @@ export class AuthService {
   }
 
   private async getUserByUserName(query): Promise<User> {
-    return this.userRepository.createQueryBuilder('user').where(query).getOne();
+    return this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where(query)
+      .getOne();
   }
 }

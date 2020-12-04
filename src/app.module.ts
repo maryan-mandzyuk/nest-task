@@ -9,6 +9,7 @@ import { RedisModule } from 'nestjs-redis';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { PurchasesModule } from './purchases/purchases.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     ProductsModule,
     AuthModule,
     LogsModule,
+    PurchasesModule,
     RedisModule.register(redisConfig),
     MailerModule.forRoot(emailConfig),
   ],

@@ -23,6 +23,7 @@ export class ProductsService {
   ): Promise<Product[]> {
     return this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.user', 'user')
       .where(userId ? 'product.user_id = :userId' : 'TRUE', {
         userId,
       })
@@ -32,7 +33,7 @@ export class ProductsService {
       })
       .skip(PRODUCTS_PER_PAGE * (page - 1))
       .take(PRODUCTS_PER_PAGE)
-      .orderBy({ price: orderPrice })
+      .orderBy('product.price', orderPrice)
       .getMany();
   }
 

@@ -54,4 +54,9 @@ export enum USER_ROLES {
   customer = 'customer',
 }
 
+export enum PURCHASE_STATUS {
+  received = 'received',
+  shipped = 'shipped',
+  completed = 'completed',
+}
 export const ID_PARAM = { type: 'string', name: 'id' };

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { USER_ROLES } from 'src/constants';
 import { Logs } from 'src/logs/logs.entity';
 import { Product } from 'src/products/product.entity';
@@ -35,7 +36,8 @@ export class User {
   role: USER_ROLES;
 
   @ApiProperty()
-  @Column()
+  @Exclude()
+  @Column({ select: false })
   password: string;
 
   @OneToMany(() => Product, (product) => product.user)
