@@ -14,7 +14,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { ID_PARAM, TOKEN_TYPES } from 'src/constants';
 import { DeleteResult } from 'typeorm';
 import { UpdatePasswordUserDto } from './dto/update-password.dto';

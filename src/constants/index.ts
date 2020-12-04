@@ -49,4 +49,9 @@ export enum LOG_OPERATION {
   delete = 'delete',
 }
 
+export enum USER_ROLES {
+  seller = 'seller',
+  customer = 'customer',
+}
+
 export const ID_PARAM = { type: 'string', name: 'id' };

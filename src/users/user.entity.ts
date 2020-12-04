@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { USER_ROLES } from 'src/constants';
 import { Logs } from 'src/logs/logs.entity';
 import { Product } from 'src/products/product.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
@@ -28,6 +29,10 @@ export class User {
   @ApiProperty()
   @Column()
   lastName: string;
+
+  @ApiProperty({ enum: USER_ROLES })
+  @Column()
+  role: USER_ROLES;
 
   @ApiProperty()
   @Column()

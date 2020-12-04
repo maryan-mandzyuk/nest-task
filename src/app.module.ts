@@ -7,6 +7,8 @@ import { LogsModule } from './logs/logs.module';
 import { dbConfig, emailConfig, redisConfig } from './AppConfig';
 import { RedisModule } from 'nestjs-redis';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/guards/roles.guard';
 
 @Module({
   imports: [
@@ -19,6 +21,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     MailerModule.forRoot(emailConfig),
   ],
   controllers: [],
-  providers: [],
+  providers: [{ provide: APP_GUARD, useClass: RolesGuard }],
 })
 export class AppModule {}

@@ -28,10 +28,10 @@ import {
 } from '@nestjs/swagger/dist';
 import { Response as ExpressResponse } from 'express';
 import { appConfig } from 'src/AppConfig';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CustomRequest } from 'src/auth/auth.interfaces';
 import { AuthHelper } from 'src/auth/authHelper';
-import { ID_PARAM, TOKEN_KEY, TOKEN_TYPES } from 'src/constants';
+import { ID_PARAM, TOKEN_KEY, TOKEN_TYPES, USER_ROLES } from 'src/constants';
 import { UsersService } from 'src/users/users.service';
 import { ApiFile } from './decorators/apiFile.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -39,9 +39,9 @@ import { FindProductQueryDto } from './dto/find-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
+import { Roles } from 'src/auth/roles.decorator';
 @ApiTags('products')
 @ApiBearerAuth()
-@UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
 @Controller('products')
 export class ProductsController {
   constructor(
@@ -50,6 +50,8 @@ export class ProductsController {
   ) {}
 
   @Get('/me')
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
   @ApiQuery({
     type: FindProductQueryDto,
   })
@@ -57,17 +59,33 @@ export class ProductsController {
     type: [Product],
     status: 200,
   })
-  findAll(
+  findProductsByUser(
     @Request() req,
     @Query() query: FindProductQueryDto,
   ): Promise<Product[]> {
     const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
     const { userId } = AuthHelper.decodeTokenPayload(token);
 
-    return this.productsService.handleFindByUser(userId, { ...query });
+    return this.productsService.handleFindProducts({ ...query }, userId);
   }
 
+  @Get('')
+  @ApiQuery({
+    type: FindProductQueryDto,
+  })
+  @ApiResponse({
+    type: [Product],
+    status: 200,
+  })
+  findAllProducts(
+    @Request() req,
+    @Query() query: FindProductQueryDto,
+  ): Promise<Product[]> {
+    return this.productsService.handleFindProducts({ ...query });
+  }
   @Get('/export')
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
   @ApiQuery({
     type: FindProductQueryDto,
   })
@@ -82,6 +100,8 @@ export class ProductsController {
   }
 
   @Post('/import')
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
   @ApiConsumes('multipart/form-data')
   @ApiFile(appConfig.PRODUCTS_IMPORT_FILE)
   @UseInterceptors(FileInterceptor(appConfig.PRODUCTS_IMPORT_FILE))
@@ -105,6 +125,8 @@ export class ProductsController {
   }
 
   @Post()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
   @ApiBody({ type: CreateProductDto })
   @ApiCreatedResponse({
     type: Product,
@@ -130,6 +152,8 @@ export class ProductsController {
   }
 
   @Put('/:id')
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
   @ApiBody({ type: UpdateProductDto })
   @ApiParam({ type: 'string', name: 'id' })
   @ApiResponse({
@@ -153,6 +177,8 @@ export class ProductsController {
   }
 
   @Delete('/:id')
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
   @ApiParam({ type: 'string', name: 'id' })
   @ApiResponse({
     type: Product,

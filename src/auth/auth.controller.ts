@@ -12,7 +12,7 @@ import { TOKEN_KEY, TOKEN_TYPES } from 'src/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { User } from 'src/users/user.entity';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from './guards/auth.guard';
 import { CustomRequest, ITokensResponse } from './auth.interfaces';
 import { AuthService } from './auth.service';
 import { AuthHelper } from './authHelper';

@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { ERROR_MESSAGES, TOKEN_TYPES } from 'src/constants';
-import { CustomRequest } from './auth.interfaces';
-import { AuthHelper } from './authHelper';
+import { CustomRequest } from '../auth.interfaces';
+import { AuthHelper } from '../authHelper';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

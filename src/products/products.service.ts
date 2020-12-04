@@ -17,13 +17,15 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  public async handleFindByUser(
-    userId: string,
+  public async handleFindProducts(
     { orderPrice = ORDER.ASC, page = 1, searchTerm }: FindProductQueryDto,
+    userId?: string,
   ): Promise<Product[]> {
     return this.productRepository
       .createQueryBuilder('product')
-      .where('product.user_id = :userId', { userId })
+      .where(userId ? 'product.user_id = :userId' : 'TRUE', {
+        userId,
+      })
       .andWhere('product.isDeleted = false')
       .andWhere(searchTerm ? 'product.name ILIKE :searchTerm' : 'TRUE', {
         searchTerm: `%${searchTerm}%`,
