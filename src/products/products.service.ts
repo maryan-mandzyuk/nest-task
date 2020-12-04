@@ -41,12 +41,12 @@ export class ProductsService {
   public async handleCsvExport(
     userId: string,
     res: Response,
-    { orderPrice = ORDER.ASC, page = 1 }: FindProductQueryDto,
+    { orderPrice = ORDER.ASC, page = 1, searchTerm = '' }: FindProductQueryDto,
   ): Promise<Response> {
     const products = await this.productRepository.query(`
       SELECT product.name, description, price, "createdAt" , string_agg(prop.name || ': ' || prop.value, ', ') as property
       FROM product, json_to_recordset(product.property) AS prop("name" text, "value" text)
-      WHERE user_id = ${userId}
+      WHERE user_id = ${userId} and product.name ILIKE '%${searchTerm}%'
       GROUP BY id
       ORDER BY price ${orderPrice}
       LIMIT ${PRODUCTS_PER_PAGE} OFFSET ${PRODUCTS_PER_PAGE * (page - 1)};
@@ -57,8 +57,8 @@ export class ProductsService {
   }
 
   public async handelCsvImport(user: User, file: any): Promise<void> {
-    try {
-      const stream = parse({ headers: true }).on('data', (row) => {
+    const stream = parse({ headers: true }).on('data', (row) => {
+      try {
         const propertyArray = row.property
           .split(',')
           .map((el: string) => el.split(':'));
@@ -67,21 +67,20 @@ export class ProductsService {
           (acc, curr) => [...acc, { ['name']: curr[0], ['value']: curr[1] }],
           [],
         );
-
         this.productRepository.save({
           ...row,
           property: propertyArrayOfJson,
           user,
         });
-      });
-      stream.write(file.buffer);
-      stream.end();
-    } catch (e) {
-      throw new HttpException(
-        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+      } catch (e) {
+        throw new HttpException(
+          { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    });
+    stream.write(file.buffer);
+    stream.end();
   }
 
   public handelCreate(
