@@ -7,6 +7,7 @@ import {
   Post,
   Body,
   Param,
+  Put,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -17,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { ID_PARAM } from 'src/constants';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
+import { UpdatePurchaseDto } from './dto/update-purchase.dto';
 import { Purchase } from './entities/purchase.entity';
 import { PurchasesService } from './purchases.service';
 
@@ -31,11 +33,6 @@ export class PurchasesController {
     return this.purchasesService.handleFindBySeller(params.id);
   }
 
-  @Get('/')
-  findAllPurchases() {
-    return;
-  }
-
   @Get('/:id/')
   @ApiParam(ID_PARAM)
   findPurchaseById(@Param() params): Promise<Purchase> {
@@ -48,5 +45,14 @@ export class PurchasesController {
     @Body() createPurchaseDto: CreatePurchaseDto,
   ): Promise<Purchase> {
     return this.purchasesService.handleCreate(createPurchaseDto);
+  }
+
+  @Put('/:id')
+  @ApiParam(ID_PARAM)
+  updatePurchase(
+    @Param() params,
+    @Body() purchaseDto: UpdatePurchaseDto,
+  ): Promise<Purchase> {
+    return this.purchasesService.handleUpdate(params.id, purchaseDto);
   }
 }
