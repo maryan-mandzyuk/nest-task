@@ -13,19 +13,17 @@ import { Purchase } from './purchase.entity';
 export class PurchaseItem {
   @ApiProperty()
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
   @ApiProperty()
   @Column()
-  quantity: string;
+  quantity: number;
 
-  @ApiProperty({ type: () => Purchase })
   @ManyToOne(() => Purchase, (purchase) => purchase.purchaseItems)
   @JoinColumn({ name: 'purchase_id' })
   purchase: Purchase;
 
-  @ApiProperty({ type: () => Product })
-  @ManyToOne(() => Product, (product) => product.logs)
+  @ManyToOne(() => Product, (product) => product.purchaseItems)
   @JoinColumn({ name: 'product_id' })
   product: Product;
 }

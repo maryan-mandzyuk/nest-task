@@ -7,7 +7,7 @@ import { PurchaseItem } from './purchaseItem.entity';
 export class Purchase {
   @ApiProperty()
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
   @ApiProperty()
   @Column()
@@ -23,9 +23,8 @@ export class Purchase {
 
   @ApiProperty()
   @Column({ enum: PURCHASE_STATUS })
-  status: PURCHASE_STATUS;
+  status?: PURCHASE_STATUS;
 
-  @ApiProperty({ type: () => [PurchaseItem] })
   @OneToMany(() => PurchaseItem, (purchaseItem) => purchaseItem.purchase)
-  purchaseItems: PurchaseItem[];
+  purchaseItems?: PurchaseItem[];
 }

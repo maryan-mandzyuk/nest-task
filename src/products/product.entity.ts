@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Logs } from 'src/logs/logs.entity';
+import { PurchaseItem } from 'src/purchases/entities/purchaseItem.entity';
 import { User } from 'src/users/user.entity';
 import {
   Entity,
@@ -47,4 +48,7 @@ export class Product {
 
   @OneToMany(() => Logs, (log) => log.product)
   logs: Logs[];
+
+  @OneToMany(() => PurchaseItem, (purchaseItem) => purchaseItem.product)
+  purchaseItems: PurchaseItem[];
 }
