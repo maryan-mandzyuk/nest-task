@@ -29,7 +29,7 @@ export class AddPurchaseTable1607094489604 implements MigrationInterface {
               PURCHASE_STATUS.shipped,
               PURCHASE_STATUS.completed,
             ],
-            default: `"${PURCHASE_STATUS.received}"`,
+            default: `'"${PURCHASE_STATUS.received}"'`,
           },
           {
             name: 'address',

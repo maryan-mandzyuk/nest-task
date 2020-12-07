@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { User } from './user.entity';
+import { Users } from './user.entity';
 import { Repository, DeleteResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,18 +11,18 @@ import { AuthHelper } from 'src/auth/authHelper';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(Users)
+    private readonly userRepository: Repository<Users>,
   ) {}
 
-  public handleFindById(id: string): Promise<User | never> {
+  public handleFindById(id: string): Promise<Users | never> {
     return this.userRepository.findOneOrFail(id);
   }
 
   public async handleUserUpdate(
     id: string,
     userDto: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<Users> {
     try {
       const user = await this.userRepository.findOneOrFail(id);
 
@@ -41,7 +41,7 @@ export class UsersService {
   public async handlePasswordUpdate(
     id: string,
     userDto: UpdatePasswordUserDto,
-  ): Promise<User> {
+  ): Promise<Users> {
     try {
       const user = await this.userRepository
         .createQueryBuilder('user')

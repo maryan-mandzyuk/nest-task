@@ -19,7 +19,7 @@ import { ID_PARAM, TOKEN_TYPES } from 'src/constants';
 import { DeleteResult } from 'typeorm';
 import { UpdatePasswordUserDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './user.entity';
+import { Users } from './user.entity';
 import { UsersService } from './users.service';
 @ApiTags('users')
 @Controller('users')
@@ -31,10 +31,10 @@ export class UsersController {
   @Get('/:id')
   @ApiParam(ID_PARAM)
   @ApiResponse({
-    type: User,
+    type: Users,
     status: 200,
   })
-  async findById(@Param() params): Promise<User> {
+  async findById(@Param() params): Promise<Users> {
     return this.usersService.handleFindById(params.id);
   }
 
@@ -52,9 +52,9 @@ export class UsersController {
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
     status: 200,
-    type: User,
+    type: Users,
   })
-  update(@Param() params, @Body() userDto: UpdateUserDto): Promise<User> {
+  update(@Param() params, @Body() userDto: UpdateUserDto): Promise<Users> {
     return this.usersService.handleUserUpdate(params.id, userDto);
   }
 
@@ -63,12 +63,12 @@ export class UsersController {
   @ApiBody({ type: UpdatePasswordUserDto })
   @ApiResponse({
     status: 200,
-    type: User,
+    type: Users,
   })
   updatePassword(
     @Param() params,
     @Body() userDto: UpdatePasswordUserDto,
-  ): Promise<User> {
+  ): Promise<Users> {
     return this.usersService.handlePasswordUpdate(params.id, userDto);
   }
 }

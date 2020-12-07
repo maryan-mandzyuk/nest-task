@@ -6,14 +6,16 @@ import {
   Query,
   Post,
   Body,
+  Param,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth,
   ApiBody,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { ID_PARAM } from 'src/constants';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { Purchase } from './entities/purchase.entity';
 import { PurchasesService } from './purchases.service';
@@ -24,13 +26,20 @@ export class PurchasesController {
   constructor(private purchasesService: PurchasesService) {}
 
   @Get('/seller/:id')
-  findPurchasesBySeller() {
-    return;
+  @ApiParam(ID_PARAM)
+  findPurchasesBySeller(@Param() params) {
+    return this.purchasesService.handleFindBySeller(params.id);
   }
 
   @Get('/')
   findAllPurchases() {
     return;
+  }
+
+  @Get('/:id/')
+  @ApiParam(ID_PARAM)
+  findPurchaseById(@Param() params): Promise<Purchase> {
+    return this.purchasesService.handleFindById(params.id);
   }
 
   @Post('/')

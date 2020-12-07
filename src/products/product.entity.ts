@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Logs } from 'src/logs/logs.entity';
 import { PurchaseItem } from 'src/purchases/entities/purchaseItem.entity';
-import { User } from 'src/users/user.entity';
+import { Users } from 'src/users/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -42,9 +42,9 @@ export class Product {
   @Column('json')
   property: ProductPropertyDto[];
 
-  @ManyToOne(() => User, (user) => user.products)
+  @ManyToOne(() => Users, (user) => user.products)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: Users;
 
   @OneToMany(() => Logs, (log) => log.product)
   logs: Logs[];

@@ -35,7 +35,7 @@ export class AddPurchaseItemTable1607095961226 implements MigrationInterface {
     );
 
     await queryRunner.createForeignKey(
-      'purchaseItem',
+      'purchase_item',
       new TableForeignKey({
         columnNames: ['purchase_id'],
         referencedColumnNames: ['id'],
@@ -45,7 +45,7 @@ export class AddPurchaseItemTable1607095961226 implements MigrationInterface {
     );
 
     await queryRunner.createForeignKey(
-      'purchaseItem',
+      'purchase_item',
       new TableForeignKey({
         columnNames: ['product_id'],
         referencedColumnNames: ['id'],
@@ -56,6 +56,6 @@ export class AddPurchaseItemTable1607095961226 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('purchaseItem');
+    await queryRunner.dropTable('purchase_item');
   }
 }

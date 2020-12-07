@@ -13,7 +13,7 @@ import {
 } from 'src/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
-import { User } from 'src/users/user.entity';
+import { Users } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
 import { ITokensResponse } from './auth.interfaces';
@@ -24,7 +24,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Users) private readonly userRepository: Repository<Users>,
     private readonly redisService: RedisService,
     private readonly mailerService: MailerService,
   ) {}
@@ -33,7 +33,6 @@ export class AuthService {
     try {
       const { userName, password } = loginDto;
       const user = await this.getUserByUserName({ userName });
-      console.log(user);
 
       if (!user) {
         throw new HttpException(
@@ -113,7 +112,7 @@ export class AuthService {
     }
   }
 
-  public async handleCreate(userDto: CreateUserDto): Promise<User> {
+  public async handleCreate(userDto: CreateUserDto): Promise<Users> {
     try {
       const { userName, password, email } = userDto;
 
@@ -247,7 +246,7 @@ export class AuthService {
     return emailToken;
   }
 
-  private async getUserByUserName(query): Promise<User> {
+  private async getUserByUserName(query): Promise<Users> {
     return this.userRepository
       .createQueryBuilder('user')
       .addSelect('user.password')

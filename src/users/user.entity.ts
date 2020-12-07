@@ -6,7 +6,7 @@ import { Product } from 'src/products/product.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity()
-export class User {
+export class Users {
   @ApiProperty()
   @PrimaryGeneratedColumn()
   id: number;

@@ -11,7 +11,7 @@ import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TOKEN_KEY, TOKEN_TYPES } from 'src/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
-import { User } from 'src/users/user.entity';
+import { Users } from 'src/users/user.entity';
 import { AuthGuard } from './guards/auth.guard';
 import { CustomRequest, ITokensResponse } from './auth.interfaces';
 import { AuthService } from './auth.service';
@@ -41,10 +41,10 @@ export class AuthController {
     type: CreateUserDto,
   })
   @ApiResponse({
-    type: User,
+    type: Users,
     status: 200,
   })
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
+  create(@Body() createUserDto: CreateUserDto): Promise<Users> {
     return this.authService.handleCreate(createUserDto);
   }
 

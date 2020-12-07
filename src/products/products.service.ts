@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { User } from 'src/users/user.entity';
+import { Users } from 'src/users/user.entity';
 import { ERROR_MESSAGES, ORDER, PRODUCTS_PER_PAGE } from 'src/constants';
 import { FindProductQueryDto } from './dto/find-product.dto';
 import { write, parse } from 'fast-csv';
@@ -59,7 +59,7 @@ export class ProductsService {
     return write(products, { headers: true }).pipe(res);
   }
 
-  public async handelCsvImport(user: User, file: any): Promise<void> {
+  public async handelCsvImport(user: Users, file: any): Promise<void> {
     const stream = parse({ headers: true }).on('data', (row) => {
       try {
         const propertyArray = row.property
@@ -88,7 +88,7 @@ export class ProductsService {
 
   public handelCreate(
     productDto: CreateProductDto,
-    user: User,
+    user: Users,
   ): Promise<Product> {
     return this.productRepository.save({
       ...productDto,

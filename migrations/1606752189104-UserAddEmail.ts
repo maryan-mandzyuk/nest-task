@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 export class UserAddEmail1606752189104 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(
-      'user',
+      'users',
       new TableColumn({
         name: 'email',
         type: 'varchar',
@@ -13,7 +13,7 @@ export class UserAddEmail1606752189104 implements MigrationInterface {
     );
 
     await queryRunner.addColumn(
-      'user',
+      'users',
       new TableColumn({
         name: 'isEmailConfirmed',
         type: 'boolean',
@@ -23,7 +23,7 @@ export class UserAddEmail1606752189104 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropColumn('user', 'email');
-    await queryRunner.dropColumn('user', 'isEmailConfirmed');
+    await queryRunner.dropColumn('users', 'email');
+    await queryRunner.dropColumn('users', 'isEmailConfirmed');
   }
 }

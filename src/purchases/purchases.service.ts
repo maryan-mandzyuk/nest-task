@@ -19,7 +19,7 @@ export class PurchasesService {
     private readonly connection: Connection,
   ) {}
 
-  async handleCreate(purchaseDto: CreatePurchaseDto): Promise<Purchase> {
+  public async handleCreate(purchaseDto: CreatePurchaseDto): Promise<Purchase> {
     return this.connection.transaction(async (manager) => {
       try {
         const purchaseRepositoryTransaction = manager.getRepository<Purchase>(
@@ -31,12 +31,25 @@ export class PurchasesService {
         );
         const purchase = await purchaseRepositoryTransaction.save(purchaseDto);
 
-        const itemsToSave = await this.getPurchaseItemsArray(
+        const purchasesItemsToSave = await this.getPurchaseItemsArray(
           purchaseDto.purchaseItem,
           purchase,
         );
 
-        await purchaseItemRepositoryTransaction.save(itemsToSave);
+        const purchaseItems = await purchaseItemRepositoryTransaction.save(
+          purchasesItemsToSave,
+        );
+
+        const productIds = purchaseItems.map((item) => item.product.id);
+
+        const sellerEmails = await purchaseItemRepositoryTransaction.query(`
+        SELECT distinct users.email
+        FROM users 
+        JOIN product ON product.user_id = users.id
+        JOIN purchase_item ON product.id = purchase_item.product_id
+        WHERE purchase_item.purchase_id = ${purchase.id} AND product.id IN (${productIds})`);
+
+        console.log(sellerEmails);
 
         return purchase;
       } catch (e) {
@@ -46,6 +59,25 @@ export class PurchasesService {
         );
       }
     });
+  }
+
+  public handleFindById(id: string): Promise<Purchase> {
+    return this.purchaseRepository
+      .createQueryBuilder('purchase')
+      .leftJoinAndSelect('purchase.purchaseItems', 'purchase_item')
+      .leftJoinAndSelect('purchase_item.product', 'product')
+      .where('purchase.id = :id', { id })
+      .getOneOrFail();
+  }
+
+  public handleFindBySeller(id: string): Promise<Purchase[]> {
+    return this.purchaseRepository
+      .createQueryBuilder('purchase')
+      .leftJoinAndSelect('purchase.purchaseItems', 'purchase_item')
+      .leftJoinAndSelect('purchase_item.product', 'product')
+      .leftJoin('product.user', 'users')
+      .where('users.id = :id', { id })
+      .getMany();
   }
 
   private getPurchaseItem = async (

@@ -4,7 +4,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 export class AddUserRoles1607082522979 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(
-      'user',
+      'users',
       new TableColumn({
         name: 'role',
         type: 'varchar',
@@ -15,6 +15,6 @@ export class AddUserRoles1607082522979 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropColumn('user', 'role');
+    await queryRunner.dropColumn('users', 'role');
   }
 }

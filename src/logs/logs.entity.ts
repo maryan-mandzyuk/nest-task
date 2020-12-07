@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Product } from 'src/products/product.entity';
-import { User } from 'src/users/user.entity';
+import { Users } from 'src/users/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -27,10 +27,10 @@ export class Logs {
   @Column({ type: 'timestamp', default: new Date() })
   createdAt: string;
 
-  @ApiProperty({ type: () => User })
-  @ManyToOne(() => User, (user) => user.logs)
+  @ApiProperty({ type: () => Users })
+  @ManyToOne(() => Users, (user) => user.logs)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: Users;
 
   @ApiProperty({ type: () => Product })
   @ManyToOne(() => Product, (product) => product.logs)

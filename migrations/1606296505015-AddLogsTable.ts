@@ -48,7 +48,7 @@ export class AddLogsTable1606296505015 implements MigrationInterface {
       new TableForeignKey({
         columnNames: ['user_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'user',
+        referencedTableName: 'users',
         onDelete: 'CASCADE',
       }),
     );
