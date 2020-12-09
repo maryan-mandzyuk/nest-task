@@ -1,8 +1,12 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { emailData } from 'src/AppConfig';
-import { ERROR_MESSAGES } from 'src/constants';
+import {
+  customerOrderHtml,
+  EMAIL_MESSAGES,
+  ERROR_MESSAGES,
+  sellerOrderHtml,
+} from 'src/constants';
 import { Product } from 'src/products/product.entity';
 import { Users } from 'src/users/user.entity';
 import { Connection, DeleteResult, Repository } from 'typeorm';
@@ -39,18 +43,19 @@ export class PurchasesService {
 
         this.sendMailsForSellers(purchases);
 
+        const purchaseItems = await this.purchaseItemRepository
+          .createQueryBuilder('purchase_item')
+          .leftJoinAndSelect('purchase_item.product', 'product')
+          .where('purchase_item.purchase_id IN (:...purchaseIds)', {
+            purchaseIds: purchases.map((p) => p.id),
+          })
+          .getMany();
+
         await this.mailerService.sendMail({
           to: purchaseDto.email,
-          subject: emailData.confirmMessageSubject,
-          text: emailData.confirmMessageText,
-          html: `<div>
-            <p>You order created, Address: ${
-              purchaseDto.address
-            }, Phone number: ${purchaseDto.phoneNumber}</p>
-            <p>Products ordered: ${purchaseDto.purchaseItem.map(
-              (item) => `${item.products} `,
-            )}</p>
-           </div>`,
+          subject: EMAIL_MESSAGES.customerOrderSubject,
+          text: EMAIL_MESSAGES.customerOrderText,
+          html: customerOrderHtml(purchaseDto, purchaseItems),
         });
 
         return purchases;
@@ -63,12 +68,12 @@ export class PurchasesService {
     });
   }
 
-  public handleFindById(id: string): Promise<Purchase> {
+  public handleFindById(id: string, userId: string): Promise<Purchase> {
     return this.purchaseRepository
       .createQueryBuilder('purchase')
       .leftJoinAndSelect('purchase.purchaseItems', 'purchase_item')
       .leftJoinAndSelect('purchase_item.product', 'product')
-      .where('purchase.id = :id', { id })
+      .where('purchase.id = :id AND purchase.user_id', { id, userId })
       .getOneOrFail();
   }
 
@@ -84,6 +89,7 @@ export class PurchasesService {
 
   public handleUpdate(
     id: string,
+    userId: string,
     purchaseDto: UpdatePurchaseDto,
   ): Promise<Purchase> {
     return this.connection.transaction(async (manager) => {
@@ -94,7 +100,9 @@ export class PurchasesService {
 
         this.updatePurchaseItemsArray(purchaseDto.purchaseItem);
 
-        const purchase = await purchaseRepositoryTransaction.findOneOrFail(id);
+        const purchase = await purchaseRepositoryTransaction.findOne({
+          where: { id, user: userId },
+        });
 
         const updatedPurchase = await purchaseRepositoryTransaction.save({
           ...purchase,
@@ -111,8 +119,8 @@ export class PurchasesService {
     });
   }
 
-  public handleDelete(id: string): Promise<DeleteResult> {
-    return this.purchaseRepository.delete(id);
+  public handleDelete(id: number, userId: string): Promise<DeleteResult> {
+    return this.purchaseRepository.delete({ id, user: { id: userId } });
   }
 
   private updatePurchaseItem = async (
@@ -145,16 +153,9 @@ export class PurchasesService {
 
     this.mailerService.sendMail({
       to: purchase.user.email,
-      subject: emailData.confirmMessageSubject,
-      text: emailData.confirmMessageText,
-      html: `<div>
-        <p>You received new order from customer email: ${
-          purchase.email
-        } address: ${purchase.address} phone number: ${purchase.phoneNumber}</p>
-        <p>Products ordered: ${purchaseItems.map(
-          (i) => `${i.product.name} quantity: ${i.quantity}`,
-        )}</p>
-       </div>`,
+      subject: EMAIL_MESSAGES.sellerOrderSubject,
+      text: EMAIL_MESSAGES.sellerOrderText,
+      html: sellerOrderHtml(purchase, purchaseItems),
     });
   };
 

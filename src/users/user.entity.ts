@@ -10,7 +10,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 export class Users {
   @ApiProperty()
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
   @ApiProperty()
   @Column()

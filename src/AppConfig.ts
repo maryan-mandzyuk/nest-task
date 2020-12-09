@@ -4,10 +4,10 @@ import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConne
 export const appConfig = {
   PORT: get('appConfig.port'),
   JWT_SECRET: get('appConfig.jwtSecret'),
-  ACCESS_TOKEN_EXPIRE_MIN: get('appConfig.accessTokenExpireMin'),
-  REFRESH_TOKEN_EXPIRE_MIN: get('appConfig.refreshTokenExpireMin'),
-  EMAIL_TOKEN_EXPIRE_DAY: get('appConfig.emailTokenExpireDay'),
-  RESET_TOKEN_EXPIRE_DAY: get('appConfig.resetTokenExpireDay'),
+  ACCESS_TOKEN_EXPIRE: get('appConfig.accessTokenExpire'),
+  REFRESH_TOKEN_EXPIRE: get('appConfig.refreshTokenExpire'),
+  ACTIVATION_TOKEN_EXPIRE: get('appConfig.activationTokenExpire'),
+  RESET_TOKEN_EXPIRE: get('appConfig.resetTokenExpire'),
   PRODUCTS_EXPORT_FILE: get('appConfig.exportProductsFileName'),
   PRODUCTS_IMPORT_FILE: get('appConfig.importProductsFileName'),
 };
@@ -39,11 +39,6 @@ export const emailData = {
   host: get('emailConfig.host'),
   fromMessage: get('emailConfig.fromMessage'),
   confirmUrl: get('emailConfig.confirmUrl'),
-  confirmMessageSubject: get('emailConfig.confirmMessageSubject'),
-  confirmMessageText: get('emailConfig.confirmMessageText'),
-  confirmationMessage: get('emailConfig.confirmationMessage'),
-  resetMessageSubject: get('emailConfig.resetMessageSubject'),
-  resetMessageText: get('emailConfig.resetMessageText'),
 };
 
 export const emailTransport = `smtps://${emailData.email}:${emailData.password}@smtp.${emailData.host}`;

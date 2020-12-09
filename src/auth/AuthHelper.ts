@@ -7,7 +7,7 @@ import { CustomRequest, ITokenPayload } from './auth.interfaces';
 
 export class AuthHelper {
   static getTokenFromRequest(req: CustomRequest, tokenKey: TOKEN_KEY): string {
-    if (tokenKey === TOKEN_KEY.EMAIL) {
+    if (tokenKey === TOKEN_KEY.ACTIVATION) {
       const { emailToken } = req.params;
       return emailToken;
     } else {
@@ -44,8 +44,8 @@ export class AuthHelper {
         return TOKEN_KEY.ACCESS;
       case TOKEN_TYPES.REFRESH:
         return TOKEN_KEY.REFRESH;
-      case TOKEN_TYPES.EMAIL:
-        return TOKEN_KEY.EMAIL;
+      case TOKEN_TYPES.ACTIVATION:
+        return TOKEN_KEY.ACTIVATION;
       case TOKEN_TYPES.RESET:
         return TOKEN_KEY.RESET;
       default:

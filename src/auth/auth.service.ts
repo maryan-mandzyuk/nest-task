@@ -5,6 +5,7 @@ import { sign } from 'jsonwebtoken';
 import { appConfig, emailData } from 'src/AppConfig';
 import {
   CONFIRM_EMAIL_HTML_HANDLER,
+  EMAIL_MESSAGES,
   ERROR_MESSAGES,
   RESET_HTML_HANDLER,
   SUCCESS_MESSAGES,
@@ -133,13 +134,13 @@ export class AuthService {
 
       const emailToken = this.handleTokenGenerateByType(
         newUser.id,
-        TOKEN_TYPES.EMAIL,
+        TOKEN_TYPES.ACTIVATION,
       );
 
       await this.mailerService.sendMail({
         to: email,
-        subject: emailData.confirmMessageSubject,
-        text: emailData.confirmMessageText,
+        subject: EMAIL_MESSAGES.confirmMessageSubject,
+        text: EMAIL_MESSAGES.confirmMessageText,
         html: CONFIRM_EMAIL_HTML_HANDLER(emailData.confirmUrl, emailToken),
       });
 
@@ -158,7 +159,7 @@ export class AuthService {
       const user = await this.userRepository.findOneOrFail(userId);
       user.isEmailConfirmed = true;
       await this.userRepository.save(user);
-      return emailData.confirmationMessage;
+      return EMAIL_MESSAGES.confirmationMessage;
     } catch (e) {
       throw new HttpException(
         { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
@@ -180,8 +181,8 @@ export class AuthService {
 
       await this.mailerService.sendMail({
         to: user.email,
-        subject: emailData.confirmMessageSubject,
-        text: emailData.confirmMessageText,
+        subject: EMAIL_MESSAGES.confirmMessageSubject,
+        text: EMAIL_MESSAGES.confirmMessageText,
         html: RESET_HTML_HANDLER(resetToken),
       });
 
@@ -221,7 +222,7 @@ export class AuthService {
       { userId, type: TOKEN_TYPES.ACCESS },
       appConfig.JWT_SECRET,
       {
-        expiresIn: `${appConfig.ACCESS_TOKEN_EXPIRE_MIN}m`,
+        expiresIn: appConfig.ACCESS_TOKEN_EXPIRE,
       },
     );
 
@@ -229,7 +230,7 @@ export class AuthService {
       { userId, type: TOKEN_TYPES.REFRESH },
       appConfig.JWT_SECRET,
       {
-        expiresIn: `${appConfig.REFRESH_TOKEN_EXPIRE_MIN}m`,
+        expiresIn: appConfig.REFRESH_TOKEN_EXPIRE,
       },
     );
     return {
@@ -238,9 +239,9 @@ export class AuthService {
     };
   }
 
-  private handleTokenGenerateByType(userId: number, type: TOKEN_TYPES): string {
+  private handleTokenGenerateByType(userId: string, type: TOKEN_TYPES): string {
     const emailToken = sign({ userId, type }, appConfig.JWT_SECRET, {
-      expiresIn: `${appConfig.EMAIL_TOKEN_EXPIRE_DAY}d`,
+      expiresIn: appConfig.ACTIVATION_TOKEN_EXPIRE,
     });
 
     return emailToken;

@@ -9,10 +9,10 @@
   "appConfig": {
     "port": 3000,
     "jwtSecret": "secret",
-    "accessTokenExpireMin": 120,
-    "refreshTokenExpireMin": 90,
-    "emailTokenExpireDay": 2,
-    "resetTokenExpireDay": 1,
+    "accessTokenExpire": "1d",
+    "refreshTokenExpire": "90m",
+    "activationTokenExpire": "2d",
+    "resetTokenExpire": "1d",
     "exportProductsFileName": "products.csv",
     "importProductsFileName": "file"
   },
@@ -25,11 +25,6 @@
     "password": "",
     "host": "gmail.com",
     "fromMessage": "incora-nest",
-    "confirmUrl": "http://localhost:3000/auth/confirm-email/",
-    "confirmMessageSubject": "Email confirmation",
-    "confirmMessageText": "Welcome",
-    "confirmationMessage": "Email successfully confirmed!",
-    "resetMessageSubject": "Reset password",
-    "resetMessageText": "Token for reset your password:"
+    "confirmUrl": "http://localhost:3000/auth/confirm-email/"
   }
 }
