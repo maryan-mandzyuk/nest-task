@@ -7,7 +7,6 @@ import {
   ERROR_MESSAGES,
 } from 'src/constants';
 import { Product } from 'src/products/product.entity';
-import { Users } from 'src/users/user.entity';
 import { Connection, DeleteResult, Repository } from 'typeorm';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { CreatePurchaseItemDto } from './dto/create-purchaseItem.dto';
@@ -24,8 +23,6 @@ export class PurchasesService {
     private readonly purchaseItemRepository: Repository<PurchaseItem>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
-    @InjectRepository(Users)
-    private readonly userRepository: Repository<Users>,
     private readonly connection: Connection,
     private readonly mailerService: MailerService,
   ) {}

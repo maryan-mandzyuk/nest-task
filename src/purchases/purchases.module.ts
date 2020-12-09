@@ -8,7 +8,7 @@ import { PurchasesController } from './purchases.controller';
 import { PurchasesService } from './purchases.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Purchase, PurchaseItem, Product, Users])],
+  imports: [TypeOrmModule.forFeature([Purchase, PurchaseItem, Product])],
   controllers: [PurchasesController],
   providers: [PurchasesService],
   exports: [PurchasesService],
