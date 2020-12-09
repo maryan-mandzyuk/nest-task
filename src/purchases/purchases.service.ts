@@ -4,10 +4,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { emailData } from 'src/AppConfig';
 import { ERROR_MESSAGES } from 'src/constants';
 import { Product } from 'src/products/product.entity';
-import { Connection, Repository } from 'typeorm';
+import { Users } from 'src/users/user.entity';
+import { Connection, DeleteResult, Repository } from 'typeorm';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { CreatePurchaseItemDto } from './dto/create-purchaseItem.dto';
+import { ProductPurchaseDto } from './dto/product-purchase.dto';
 import { UpdatePurchaseDto } from './dto/update-purchase.dto';
+import { UpdatePurchaseItemDto } from './dto/update-purchaseItem.dto';
 import { Purchase } from './entities/purchase.entity';
 import { PurchaseItem } from './entities/purchaseItem.entity';
 @Injectable()
@@ -19,71 +22,38 @@ export class PurchasesService {
     private readonly purchaseItemRepository: Repository<PurchaseItem>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(Users)
+    private readonly userRepository: Repository<Users>,
     private readonly connection: Connection,
     private readonly mailerService: MailerService,
   ) {}
 
-  public async handleCreate(purchaseDto: CreatePurchaseDto): Promise<Purchase> {
-    return this.connection.transaction(async (manager) => {
+  public async handleCreate(
+    purchaseDto: CreatePurchaseDto,
+  ): Promise<Purchase[]> {
+    return this.connection.transaction(async () => {
       try {
-        const purchaseRepositoryTransaction = manager.getRepository<Purchase>(
-          Purchase,
+        const purchases: Purchase[] = await this.saveArrayPurchases(
+          purchaseDto,
         );
 
-        const purchaseItemRepositoryTransaction = manager.getRepository<PurchaseItem>(
-          PurchaseItem,
-        );
-        const purchase = await purchaseRepositoryTransaction.save(purchaseDto);
-
-        const purchasesItemsToSave = await this.getPurchaseItemsArray(
-          purchaseDto.purchaseItem,
-          purchase,
-        );
-
-        const purchaseItems = await purchaseItemRepositoryTransaction.save(
-          purchasesItemsToSave,
-        );
-
-        const productIds = purchaseItems.map((item) => item.product.id);
-
-        const orderData: {
-          sellerEmail: string;
-          products: string[];
-        }[] = await purchaseItemRepositoryTransaction.query(`
-        SELECT distinct users.email, array_agg(product.name || ': ' || purchase_item.quantity) as products
-        FROM users 
-        JOIN product ON product.user_id = users.id
-        JOIN purchase_item ON product.id = purchase_item.product_id
-        WHERE purchase_item.purchase_id = ${purchase.id} AND product.id IN (${productIds})
-        GROUP BY users.email`);
-
-        orderData.forEach((item) => {
-          this.mailerService.sendMail({
-            to: item.sellerEmail,
-            subject: emailData.confirmMessageSubject,
-            text: emailData.confirmMessageText,
-            html: `<div>
-              <p>You received new order from customer email: ${purchase.email} address: ${purchase.address} phone number: ${purchase.phoneNumber}</p>
-              <p>Products ordered: ${item.products}</p>
-             </div>`,
-          });
-        });
+        this.sendMailsForSellers(purchases);
 
         await this.mailerService.sendMail({
-          to: purchase.email,
+          to: purchaseDto.email,
           subject: emailData.confirmMessageSubject,
           text: emailData.confirmMessageText,
           html: `<div>
-            <p>You order created, Address: ${purchase.address}, Phone number: ${
-            purchase.phoneNumber
-          }</p>
-            <p>Products ordered: ${orderData.map(
+            <p>You order created, Address: ${
+              purchaseDto.address
+            }, Phone number: ${purchaseDto.phoneNumber}</p>
+            <p>Products ordered: ${purchaseDto.purchaseItem.map(
               (item) => `${item.products} `,
             )}</p>
            </div>`,
         });
 
-        return purchase;
+        return purchases;
       } catch (e) {
         throw new HttpException(
           { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
@@ -122,15 +92,15 @@ export class PurchasesService {
           Purchase,
         );
 
-        const purchaseItemRepositoryTransaction = manager.getRepository<PurchaseItem>(
-          PurchaseItem,
-        );
-        // TODO update purchase item
+        this.updatePurchaseItemsArray(purchaseDto.purchaseItem);
+
         const purchase = await purchaseRepositoryTransaction.findOneOrFail(id);
-        const updatedPurchase = purchaseRepositoryTransaction.create({
+
+        const updatedPurchase = await purchaseRepositoryTransaction.save({
           ...purchase,
           ...purchaseDto,
         });
+
         return updatedPurchase;
       } catch (e) {
         throw new HttpException(
@@ -141,27 +111,107 @@ export class PurchasesService {
     });
   }
 
-  private getPurchaseItem = async (
-    item: CreatePurchaseItemDto,
-    purchase: Purchase,
-  ): Promise<PurchaseItem> => {
-    const product = await this.productRepository.findOneOrFail(item.productId);
-    const purchaseItem: PurchaseItem = {
-      product,
-      purchase,
-      quantity: item.quantity,
-    };
-    return purchaseItem;
+  public handleDelete(id: string): Promise<DeleteResult> {
+    return this.purchaseRepository.delete(id);
+  }
+
+  private updatePurchaseItem = async (
+    itemDto: UpdatePurchaseItemDto,
+  ): Promise<UpdatePurchaseItemDto> => {
+    const purchaseItem = await this.purchaseItemRepository.findOneOrFail(
+      itemDto.id,
+    );
+    return this.purchaseItemRepository.save({ ...purchaseItem, ...itemDto });
   };
 
-  private getPurchaseItemsArray = async (
-    purchaseItem: CreatePurchaseItemDto[],
+  private updatePurchaseItemsArray = (
+    itemsDto: UpdatePurchaseItemDto[],
+  ): Promise<UpdatePurchaseItemDto[]> => {
+    return Promise.all(
+      itemsDto.map((item: UpdatePurchaseItemDto) =>
+        this.updatePurchaseItem(item),
+      ),
+    );
+  };
+
+  private sendMail = async (purchase: Purchase) => {
+    const purchaseItems = await this.purchaseItemRepository
+      .createQueryBuilder('purchase_item')
+      .leftJoinAndSelect('purchase_item.product', 'product')
+      .where('purchase_item.purchase_id = :purchaseId', {
+        purchaseId: purchase.id,
+      })
+      .getMany();
+
+    this.mailerService.sendMail({
+      to: purchase.user.email,
+      subject: emailData.confirmMessageSubject,
+      text: emailData.confirmMessageText,
+      html: `<div>
+        <p>You received new order from customer email: ${
+          purchase.email
+        } address: ${purchase.address} phone number: ${purchase.phoneNumber}</p>
+        <p>Products ordered: ${purchaseItems.map(
+          (i) => `${i.product.name} quantity: ${i.quantity}`,
+        )}</p>
+       </div>`,
+    });
+  };
+
+  private sendMailsForSellers = (purchases: Purchase[]): Promise<void[]> => {
+    return Promise.all(purchases.map((item) => this.sendMail(item)));
+  };
+
+  private savePurchase = async (
+    purchaseItemDto: CreatePurchaseItemDto,
+    purchaseDto: CreatePurchaseDto,
+  ): Promise<Purchase> => {
+    const user = await this.userRepository.findOneOrFail(
+      purchaseItemDto.userId,
+    );
+    const purchase = await this.purchaseRepository.save({
+      ...purchaseDto,
+      user,
+    });
+
+    await this.saveArrayPurchaseItems(purchaseItemDto.products, purchase);
+
+    return purchase;
+  };
+
+  private saveArrayPurchases = async (
+    purchaseDto: CreatePurchaseDto,
+  ): Promise<Purchase[]> => {
+    return Promise.all(
+      purchaseDto.purchaseItem.map((item) =>
+        this.savePurchase(item, purchaseDto),
+      ),
+    );
+  };
+
+  private saveArrayPurchaseItems = async (
+    productsPurchase: ProductPurchaseDto[],
     purchase: Purchase,
   ): Promise<PurchaseItem[]> => {
     return Promise.all(
-      purchaseItem.map((item: CreatePurchaseItemDto) =>
-        this.getPurchaseItem(item, purchase),
+      productsPurchase.map((productPurchase) =>
+        this.savePurchaseItem(productPurchase, purchase),
       ),
     );
+  };
+
+  private savePurchaseItem = async (
+    productPurchase: ProductPurchaseDto,
+    purchase: Purchase,
+  ): Promise<PurchaseItem> => {
+    const product = await this.productRepository.findOneOrFail(
+      productPurchase.productId,
+    );
+
+    return this.purchaseItemRepository.save({
+      product,
+      purchase,
+      ...productPurchase,
+    });
   };
 }

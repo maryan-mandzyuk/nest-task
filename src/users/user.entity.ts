@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { USER_ROLES } from 'src/constants';
 import { Logs } from 'src/logs/logs.entity';
 import { Product } from 'src/products/product.entity';
+import { Purchase } from 'src/purchases/entities/purchase.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity()
@@ -45,4 +46,7 @@ export class Users {
 
   @OneToMany(() => Logs, (log) => log.user)
   logs: Logs[];
+
+  @OneToMany(() => Purchase, (purchase) => purchase.user)
+  purchases: Purchase[];
 }

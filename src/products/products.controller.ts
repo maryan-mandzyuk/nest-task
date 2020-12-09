@@ -41,7 +41,6 @@ import { Product } from './product.entity';
 import { ProductsService } from './products.service';
 import { Roles } from 'src/auth/roles.decorator';
 @ApiTags('products')
-@ApiBearerAuth()
 @Controller('products')
 export class ProductsController {
   constructor(
@@ -50,6 +49,7 @@ export class ProductsController {
   ) {}
 
   @Get('/me')
+  @ApiBearerAuth()
   @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @Roles(USER_ROLES.seller)
   @ApiQuery({
@@ -83,7 +83,9 @@ export class ProductsController {
   ): Promise<Product[]> {
     return this.productsService.handleFindProducts({ ...query });
   }
+
   @Get('/export')
+  @ApiBearerAuth()
   @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @Roles(USER_ROLES.seller)
   @ApiQuery({
@@ -100,6 +102,7 @@ export class ProductsController {
   }
 
   @Post('/import')
+  @ApiBearerAuth()
   @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @Roles(USER_ROLES.seller)
   @ApiConsumes('multipart/form-data')
@@ -125,6 +128,7 @@ export class ProductsController {
   }
 
   @Post()
+  @ApiBearerAuth()
   @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @Roles(USER_ROLES.seller)
   @ApiBody({ type: CreateProductDto })
@@ -152,6 +156,7 @@ export class ProductsController {
   }
 
   @Put('/:id')
+  @ApiBearerAuth()
   @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @Roles(USER_ROLES.seller)
   @ApiBody({ type: UpdateProductDto })
@@ -177,6 +182,7 @@ export class ProductsController {
   }
 
   @Delete('/:id')
+  @ApiBearerAuth()
   @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @Roles(USER_ROLES.seller)
   @ApiParam({ type: 'string', name: 'id' })

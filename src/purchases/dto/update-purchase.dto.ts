@@ -11,7 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { PURCHASE_STATUS } from 'src/constants';
-import { CreatePurchaseItemDto } from './create-purchaseItem.dto';
+import { UpdatePurchaseItemDto } from './update-purchaseItem.dto';
 export class UpdatePurchaseDto {
   @ApiProperty()
   @IsEmail()
@@ -36,7 +36,7 @@ export class UpdatePurchaseDto {
   status: PURCHASE_STATUS;
 
   @ApiProperty({
-    type: () => [CreatePurchaseItemDto],
+    type: () => [UpdatePurchaseItemDto],
     minItems: 1,
     maxItems: 250,
   })
@@ -44,6 +44,6 @@ export class UpdatePurchaseDto {
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @ArrayMaxSize(250)
-  @Type(() => CreatePurchaseItemDto)
-  purchaseItem: CreatePurchaseItemDto[];
+  @Type(() => UpdatePurchaseItemDto)
+  purchaseItem: UpdatePurchaseItemDto[];
 }

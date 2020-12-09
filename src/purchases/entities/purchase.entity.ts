@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PURCHASE_STATUS } from 'src/constants';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Users } from 'src/users/user.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { PurchaseItem } from './purchaseItem.entity';
 
 @Entity()
@@ -26,5 +34,9 @@ export class Purchase {
   status?: PURCHASE_STATUS;
 
   @OneToMany(() => PurchaseItem, (purchaseItem) => purchaseItem.purchase)
-  purchaseItems?: PurchaseItem[];
+  purchaseItems: PurchaseItem[];
+
+  @ManyToOne(() => Users, (user) => user.purchases)
+  @JoinColumn({ name: 'user_id' })
+  user: Users;
 }
