@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PURCHASE_STATUS } from 'src/constants';
 import { Users } from 'src/users/user.entity';
 import {
@@ -36,6 +36,7 @@ export class Purchase {
   @OneToMany(() => PurchaseItem, (purchaseItem) => purchaseItem.purchase)
   purchaseItems: PurchaseItem[];
 
+  @ApiPropertyOptional({ type: () => Users })
   @ManyToOne(() => Users, (user) => user.purchases)
   @JoinColumn({ name: 'user_id' })
   user: Users;

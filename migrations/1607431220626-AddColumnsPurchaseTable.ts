@@ -12,6 +12,7 @@ export class AddColumnsPurchaseTable1607431220626
       new TableColumn({
         name: 'user_id',
         type: 'int',
+        isNullable: true,
       }),
       new TableColumn({
         name: 'createdAt',

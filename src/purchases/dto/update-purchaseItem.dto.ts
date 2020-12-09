@@ -10,14 +10,6 @@ export class UpdatePurchaseItemDto {
   @Min(1)
   id: number;
 
-  @ApiProperty({
-    minimum: 1,
-  })
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  productId: number;
-
   @ApiProperty()
   @IsNumber()
   quantity: number;

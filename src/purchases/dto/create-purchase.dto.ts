@@ -9,6 +9,7 @@ import {
   Length,
   ValidateNested,
 } from 'class-validator';
+import { Users } from 'src/users/user.entity';
 import { CreatePurchaseItemDto } from './create-purchaseItem.dto';
 export class CreatePurchaseDto {
   @ApiProperty()
@@ -29,6 +30,11 @@ export class CreatePurchaseDto {
   @Length(2, 25)
   address: string;
 
+  @ApiPropertyOptional({ type: () => Users })
+  @IsOptional()
+  @Type(() => Users)
+  user: Users;
+
   @ApiProperty({
     type: () => [CreatePurchaseItemDto],
     minItems: 1,
@@ -39,5 +45,5 @@ export class CreatePurchaseDto {
   @ArrayMinSize(1)
   @ArrayMaxSize(250)
   @Type(() => CreatePurchaseItemDto)
-  purchaseItem: CreatePurchaseItemDto[];
+  purchaseItems: CreatePurchaseItemDto[];
 }
