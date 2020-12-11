@@ -37,6 +37,7 @@ describe('User route', () => {
       const res = await request(app)
         .get(`/users/${id}`)
         .set('Authorization', `Bearer ${token}`)
+        .expect('Content-Type', /json/)
         .expect(200);
 
       expect(res.body).toHaveProperty('id');
@@ -60,6 +61,7 @@ describe('User route', () => {
         .put(`/users/${id}`)
         .set('Authorization', `Bearer ${token}`)
         .send(userDto)
+        .expect('Content-Type', /json/)
         .expect(200);
 
       expect(res.body).toMatchObject(userDto);
