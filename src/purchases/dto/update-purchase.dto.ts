@@ -10,7 +10,7 @@ import {
   Length,
   ValidateNested,
 } from 'class-validator';
-import { PURCHASE_STATUS } from 'src/constants';
+import { PURCHASE_STATUS } from '../../constants';
 import { UpdatePurchaseItemDto } from './update-purchaseItem.dto';
 export class UpdatePurchaseDto {
   @ApiProperty()

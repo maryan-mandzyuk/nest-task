@@ -3,10 +3,10 @@ import { Users } from './user.entity';
 import { Repository, DeleteResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ERROR_MESSAGES } from 'src/constants';
+import { ERROR_MESSAGES } from '../constants';
 import { UpdatePasswordUserDto } from './dto/update-password.dto';
 import { compare } from 'bcrypt';
-import { AuthHelper } from 'src/auth/authHelper';
+import { AuthHelper } from '../auth/authHelper';
 
 @Injectable()
 export class UsersService {
@@ -43,11 +43,9 @@ export class UsersService {
     userDto: UpdatePasswordUserDto,
   ): Promise<Users> {
     try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .addSelect('user.password')
-        .where({ id })
-        .getOneOrFail();
+      const user = await this.userRepository.findOneOrFail(id, {
+        select: ['password'],
+      });
 
       const isPasswordEqual = await compare(userDto.oldPassword, user.password);
 
@@ -70,7 +68,7 @@ export class UsersService {
     }
   }
 
-  public handleDelete(id: number): Promise<DeleteResult> {
+  public handleDelete(id: string): Promise<DeleteResult> {
     return this.userRepository.delete(id);
   }
 }

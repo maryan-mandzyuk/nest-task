@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { ERROR_MESSAGES, TOKEN_TYPES } from 'src/constants';
+import { ERROR_MESSAGES, TOKEN_TYPES } from '../../constants';
 import { CustomRequest } from '../auth.interfaces';
 import { AuthHelper } from '../authHelper';
 

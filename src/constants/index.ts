@@ -1,6 +1,6 @@
-import { CreatePurchaseDto } from 'src/purchases/dto/create-purchase.dto';
-import { Purchase } from 'src/purchases/entities/purchase.entity';
-import { PurchaseItem } from 'src/purchases/entities/purchaseItem.entity';
+import { CreatePurchaseDto } from '../purchases/dto/create-purchase.dto';
+import { Purchase } from '../purchases/entities/purchase.entity';
+import { PurchaseItem } from '../purchases/entities/purchaseItem.entity';
 
 export const ERROR_MESSAGES = {
   DELETE_PRODUCT: 'Can not delete product!',

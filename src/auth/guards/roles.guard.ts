@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { TOKEN_TYPES } from 'src/constants';
-import { UsersService } from 'src/users/users.service';
+import { TOKEN_TYPES } from '../../constants';
+import { UsersService } from '../../users/users.service';
 import { AuthHelper } from '../authHelper';
 
 @Injectable()

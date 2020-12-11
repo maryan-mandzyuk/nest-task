@@ -4,12 +4,12 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Users } from 'src/users/user.entity';
-import { ERROR_MESSAGES, ORDER, PRODUCTS_PER_PAGE } from 'src/constants';
+import { Users } from '../users/user.entity';
+import { ERROR_MESSAGES, ORDER, PRODUCTS_PER_PAGE } from '../constants';
 import { FindProductQueryDto } from './dto/find-product.dto';
 import { write, parse } from 'fast-csv';
 import { Response } from 'express';
-import { appConfig } from 'src/AppConfig';
+import { appConfig } from '../AppConfig';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -37,7 +37,7 @@ export class ProductsService {
       .getMany();
   }
 
-  public handleFindById(id: number): Promise<Product> {
+  public handleFindById(id: string): Promise<Product> {
     return this.productRepository.findOneOrFail(id);
   }
 

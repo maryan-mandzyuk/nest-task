@@ -9,7 +9,7 @@ import {
   Length,
   ValidateNested,
 } from 'class-validator';
-import { Users } from 'src/users/user.entity';
+import { Users } from '../../users/user.entity';
 import { CreatePurchaseItemDto } from './create-purchaseItem.dto';
 export class CreatePurchaseDto {
   @ApiProperty()

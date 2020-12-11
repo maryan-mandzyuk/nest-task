@@ -8,7 +8,7 @@ import {
   Length,
   Min,
 } from 'class-validator';
-import { LOG_OPERATION } from 'src/constants';
+import { LOG_OPERATION } from '../../constants';
 export class FindLogsQueryDto {
   @ApiPropertyOptional({
     enum: LOG_OPERATION,

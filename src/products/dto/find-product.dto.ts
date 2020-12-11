@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer/decorators';
 import { IsIn, IsInt, IsOptional, Length, Min } from 'class-validator';
-import { ORDER } from 'src/constants';
+import { ORDER } from '../../constants';
 export class FindProductQueryDto {
   @ApiPropertyOptional({
     minimum: 1,

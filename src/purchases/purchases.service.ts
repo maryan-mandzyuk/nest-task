@@ -5,8 +5,8 @@ import {
   customerOrderHtml,
   EMAIL_MESSAGES,
   ERROR_MESSAGES,
-} from 'src/constants';
-import { Product } from 'src/products/product.entity';
+} from '../constants';
+import { Product } from '../products/product.entity';
 import { Connection, DeleteResult, Repository } from 'typeorm';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { CreatePurchaseItemDto } from './dto/create-purchaseItem.dto';

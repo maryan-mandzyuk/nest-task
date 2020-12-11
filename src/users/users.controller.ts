@@ -14,8 +14,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { ID_PARAM, TOKEN_TYPES } from 'src/constants';
+import { ID_PARAM, TOKEN_TYPES } from '../constants';
+import { AuthGuard } from '../auth/guards/auth.guard';
+
 import { DeleteResult } from 'typeorm';
 import { UpdatePasswordUserDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -23,12 +24,12 @@ import { Users } from './user.entity';
 import { UsersService } from './users.service';
 @ApiTags('users')
 @Controller('users')
-@ApiBearerAuth()
-@UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get('/:id')
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @ApiParam(ID_PARAM)
   @ApiResponse({
     type: Users,
@@ -39,6 +40,8 @@ export class UsersController {
   }
 
   @Delete('/:id')
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @ApiParam(ID_PARAM)
   @ApiResponse({
     status: 200,
@@ -48,6 +51,8 @@ export class UsersController {
   }
 
   @Put('/:id')
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
   @ApiParam(ID_PARAM)
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
@@ -59,6 +64,7 @@ export class UsersController {
   }
 
   @Put('/:id/password')
+  @UseGuards(new AuthGuard(TOKEN_TYPES.RESET))
   @ApiParam(ID_PARAM)
   @ApiBody({ type: UpdatePasswordUserDto })
   @ApiResponse({

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Logs } from 'src/logs/logs.entity';
-import { PurchaseItem } from 'src/purchases/entities/purchaseItem.entity';
-import { Users } from 'src/users/user.entity';
+import { Logs } from '../logs/logs.entity';
+import { PurchaseItem } from '../purchases/entities/purchaseItem.entity';
+import { Users } from '../users/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -44,11 +44,11 @@ export class Product {
 
   @ManyToOne(() => Users, (user) => user.products)
   @JoinColumn({ name: 'user_id' })
-  user: Users;
+  user?: Users;
 
   @OneToMany(() => Logs, (log) => log.product)
-  logs: Logs[];
+  logs?: Logs[];
 
   @OneToMany(() => PurchaseItem, (purchaseItem) => purchaseItem.product)
-  purchaseItems: PurchaseItem[];
+  purchaseItems?: PurchaseItem[];
 }

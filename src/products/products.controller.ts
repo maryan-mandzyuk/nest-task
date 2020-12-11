@@ -27,19 +27,19 @@ import {
   ApiTags,
 } from '@nestjs/swagger/dist';
 import { Response as ExpressResponse } from 'express';
-import { appConfig } from 'src/AppConfig';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { CustomRequest } from 'src/auth/auth.interfaces';
-import { AuthHelper } from 'src/auth/authHelper';
-import { ID_PARAM, TOKEN_KEY, TOKEN_TYPES, USER_ROLES } from 'src/constants';
-import { UsersService } from 'src/users/users.service';
+import { appConfig } from '../AppConfig';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { CustomRequest } from '../auth/auth.interfaces';
+import { AuthHelper } from '../auth/authHelper';
+import { ID_PARAM, TOKEN_KEY, TOKEN_TYPES, USER_ROLES } from '../constants';
+import { UsersService } from '../users/users.service';
 import { ApiFile } from './decorators/apiFile.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductQueryDto } from './dto/find-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
-import { Roles } from 'src/auth/roles.decorator';
+import { Roles } from '../auth/roles.decorator';
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {

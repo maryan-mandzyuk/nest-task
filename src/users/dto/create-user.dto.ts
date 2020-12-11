@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger/dist/decorators';
 import { IsEmail, IsEnum, Length } from 'class-validator';
-import { USER_ROLES } from 'src/constants';
+import { USER_ROLES } from '../../constants';
 
 export class CreateUserDto {
   @ApiProperty({

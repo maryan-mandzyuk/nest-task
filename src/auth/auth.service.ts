@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compareSync } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
-import { appConfig, emailData } from 'src/AppConfig';
+import { appConfig, emailData } from '../AppConfig';
 import {
   CONFIRM_EMAIL_HTML_HANDLER,
   EMAIL_MESSAGES,
@@ -11,10 +11,10 @@ import {
   SUCCESS_MESSAGES,
   TOKEN_TYPES,
   USER_REFRESH_TOKEN_KEY,
-} from 'src/constants';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { LoginUserDto } from 'src/users/dto/login-user.dto';
-import { Users } from 'src/users/user.entity';
+} from '../constants';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginUserDto } from '../users/dto/login-user.dto';
+import { Users } from '../users/user.entity';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
 import { ITokensResponse } from './auth.interfaces';
@@ -38,14 +38,14 @@ export class AuthService {
       if (!user) {
         throw new HttpException(
           { message: ERROR_MESSAGES.USER_NOT_FOUND },
-          HttpStatus.NOT_FOUND,
+          HttpStatus.FORBIDDEN,
         );
       }
 
       if (!user.isEmailConfirmed) {
         throw new HttpException(
           { message: ERROR_MESSAGES.EMAIL_NOT_CONFIRMED },
-          HttpStatus.UNAUTHORIZED,
+          HttpStatus.FORBIDDEN,
         );
       }
 
@@ -54,7 +54,7 @@ export class AuthService {
       if (!isEqualPass) {
         throw new HttpException(
           { message: ERROR_MESSAGES.WRONG_PASSWORD },
-          HttpStatus.UNAUTHORIZED,
+          HttpStatus.FORBIDDEN,
         );
       }
 
@@ -73,7 +73,7 @@ export class AuthService {
     } catch (e) {
       throw new HttpException(
         { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.FORBIDDEN,
       );
     }
   }

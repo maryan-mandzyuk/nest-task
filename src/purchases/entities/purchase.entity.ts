@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PURCHASE_STATUS } from 'src/constants';
-import { Users } from 'src/users/user.entity';
+import { PURCHASE_STATUS } from '../../constants';
+import { Users } from '../../users/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

@@ -16,9 +16,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthHelper } from 'src/auth/authHelper';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { ID_PARAM, TOKEN_KEY, TOKEN_TYPES } from 'src/constants';
+import { AuthHelper } from '../auth/authHelper';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { ID_PARAM, TOKEN_KEY, TOKEN_TYPES } from '../constants';
 import { DeleteResult } from 'typeorm';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { UpdatePurchaseDto } from './dto/update-purchase.dto';
