@@ -10,18 +10,37 @@ import {
   Put,
   Query,
   Request,
+  Response,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { AuthHelper } from 'src/auth/authHelper';
-import { TOKEN_HEADER_KEY, TOKEN_TYPES } from 'src/constants';
-import { UsersService } from 'src/users/users.service';
+import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger/dist';
+import { Response as ExpressResponse } from 'express';
+import { appConfig } from '../AppConfig';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { CustomRequest } from '../auth/auth.interfaces';
+import { AuthHelper } from '../auth/authHelper';
+import { ID_PARAM, TOKEN_KEY, TOKEN_TYPES, USER_ROLES } from '../constants';
+import { UsersService } from '../users/users.service';
+import { ApiFile } from './decorators/apiFile.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductQueryDto } from './dto/find-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
-@UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+import { Roles } from '../auth/roles.decorator';
+@ApiTags('products')
 @Controller('products')
 export class ProductsController {
   constructor(
@@ -30,32 +49,98 @@ export class ProductsController {
   ) {}
 
   @Get('/me')
-  findAll(
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
+  @ApiQuery({
+    type: FindProductQueryDto,
+  })
+  @ApiResponse({
+    type: [Product],
+    status: 200,
+  })
+  findProductsByUser(
     @Request() req,
     @Query() query: FindProductQueryDto,
   ): Promise<Product[]> {
-    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
+    const { userId } = AuthHelper.decodeTokenPayload(token);
+
+    return this.productsService.handleFindProducts({ ...query }, userId);
+  }
+
+  @Get('')
+  @ApiQuery({
+    type: FindProductQueryDto,
+  })
+  @ApiResponse({
+    type: [Product],
+    status: 200,
+  })
+  findAllProducts(
+    @Request() req,
+    @Query() query: FindProductQueryDto,
+  ): Promise<Product[]> {
+    return this.productsService.handleFindProducts({ ...query });
+  }
+
+  @Get('/export')
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
+  @ApiQuery({
+    type: FindProductQueryDto,
+  })
+  exportCsv(
+    @Request() req,
+    @Query() query: FindProductQueryDto,
+    @Response() res,
+  ): Promise<ExpressResponse> {
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
+    const { userId } = AuthHelper.decodeTokenPayload(token);
+    return this.productsService.handleCsvExport(userId, res, { ...query });
+  }
+
+  @Post('/import')
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
+  @ApiConsumes('multipart/form-data')
+  @ApiFile(appConfig.PRODUCTS_IMPORT_FILE)
+  @UseInterceptors(FileInterceptor(appConfig.PRODUCTS_IMPORT_FILE))
+  async importCsv(@Request() req, @UploadedFile() file): Promise<void> {
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
 
     const { userId } = AuthHelper.decodeTokenPayload(token);
 
-    return this.productsService.handleFindByUser(userId, { ...query });
+    const user = await this.usersService.handleFindById(userId);
+    this.productsService.handelCsvImport(user, file);
   }
 
   @Get('/:id')
+  @ApiParam(ID_PARAM)
+  @ApiResponse({
+    type: Product,
+    status: 200,
+  })
   findById(@Param() params): Promise<Product> {
     return this.productsService.handleFindById(params.id);
   }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
+  @ApiBody({ type: CreateProductDto })
+  @ApiCreatedResponse({
+    type: Product,
+  })
   async create(
     @Body() createProductDto: CreateProductDto,
     @Request() req,
   ): Promise<Product> {
     try {
-      const token = AuthHelper.getTokenFromRequest(
-        req,
-        TOKEN_HEADER_KEY.ACCESS,
-      );
+      const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
 
       const { userId } = AuthHelper.decodeTokenPayload(token);
 
@@ -71,12 +156,21 @@ export class ProductsController {
   }
 
   @Put('/:id')
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
+  @ApiBody({ type: UpdateProductDto })
+  @ApiParam({ type: 'string', name: 'id' })
+  @ApiResponse({
+    type: Product,
+    status: 200,
+  })
   update(
     @Body() updateProductDto: UpdateProductDto,
     @Param() params,
     @Request() req,
   ): Promise<Product> {
-    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
 
     const { userId } = AuthHelper.decodeTokenPayload(token);
 
@@ -88,8 +182,16 @@ export class ProductsController {
   }
 
   @Delete('/:id')
-  delete(@Param() params, @Request() req: Request) {
-    const token = AuthHelper.getTokenFromRequest(req, TOKEN_HEADER_KEY.ACCESS);
+  @ApiBearerAuth()
+  @UseGuards(new AuthGuard(TOKEN_TYPES.ACCESS))
+  @Roles(USER_ROLES.seller)
+  @ApiParam({ type: 'string', name: 'id' })
+  @ApiResponse({
+    type: Product,
+    status: 200,
+  })
+  delete(@Param() params, @Request() req: CustomRequest): Promise<Product> {
+    const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.ACCESS);
     const { userId } = AuthHelper.decodeTokenPayload(token);
     return this.productsService.handleDelete(params.id, userId);
   }

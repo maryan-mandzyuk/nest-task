@@ -53,7 +53,7 @@ export class AddProductsTable1606231710647 implements MigrationInterface {
       new TableForeignKey({
         columnNames: ['user_id'],
         referencedColumnNames: ['id'],
-        referencedTableName: 'user',
+        referencedTableName: 'users',
         onDelete: 'CASCADE',
       }),
     );

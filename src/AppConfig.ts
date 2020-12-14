@@ -4,8 +4,12 @@ import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConne
 export const appConfig = {
   PORT: get('appConfig.port'),
   JWT_SECRET: get('appConfig.jwtSecret'),
-  ACCESS_TOKEN_EXPIRE_MIN: get('appConfig.accessTokenExpireMin'),
-  REFRESH_TOKEN_EXPIRE_MIN: get('appConfig.refreshTokenExpireMin'),
+  ACCESS_TOKEN_EXPIRE: get('appConfig.accessTokenExpire'),
+  REFRESH_TOKEN_EXPIRE: get('appConfig.refreshTokenExpire'),
+  ACTIVATION_TOKEN_EXPIRE: get('appConfig.activationTokenExpire'),
+  RESET_TOKEN_EXPIRE: get('appConfig.resetTokenExpire'),
+  PRODUCTS_EXPORT_FILE: get('appConfig.exportProductsFileName'),
+  PRODUCTS_IMPORT_FILE: get('appConfig.importProductsFileName'),
 };
 
 export const dbConfig: PostgresConnectionOptions = {
@@ -27,4 +31,21 @@ export const dbConfig: PostgresConnectionOptions = {
 export const redisConfig = {
   port: get('redisConfig.port'),
   host: get('redisConfig.host'),
+};
+
+export const emailData = {
+  email: get('emailConfig.email'),
+  password: get('emailConfig.password'),
+  host: get('emailConfig.host'),
+  fromMessage: get('emailConfig.fromMessage'),
+  confirmUrl: get('emailConfig.confirmUrl'),
+};
+
+export const emailTransport = `smtps://${emailData.email}:${emailData.password}@smtp.${emailData.host}`;
+
+export const emailConfig = {
+  transport: emailTransport,
+  defaults: {
+    from: `${emailData.fromMessage} <${emailData.email}>`,
+  },
 };

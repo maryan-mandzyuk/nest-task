@@ -4,9 +4,12 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { User } from 'src/users/user.entity';
-import { ERROR_MESSAGES, PRODUCTS_PER_PAGE } from 'src/constants';
+import { Users } from '../users/user.entity';
+import { ERROR_MESSAGES, ORDER, PRODUCTS_PER_PAGE } from '../constants';
 import { FindProductQueryDto } from './dto/find-product.dto';
+import { write, parse } from 'fast-csv';
+import { Response } from 'express';
+import { appConfig } from '../AppConfig';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -14,32 +17,83 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  public async handleFindByUser(
-    userId,
-    { orderPrice = 'ASC', page = 1, searchTerm }: FindProductQueryDto,
+  public async handleFindProducts(
+    { orderPrice = ORDER.ASC, page = 1, searchTerm }: FindProductQueryDto,
+    userId?: string,
   ): Promise<Product[]> {
     return this.productRepository
       .createQueryBuilder('product')
-      .where('product.user_id = :userId', { userId })
+      .leftJoinAndSelect('product.user', 'user')
+      .where(userId ? 'product.user_id = :userId' : 'TRUE', {
+        userId,
+      })
       .andWhere('product.isDeleted = false')
       .andWhere(searchTerm ? 'product.name ILIKE :searchTerm' : 'TRUE', {
         searchTerm: `%${searchTerm}%`,
       })
       .skip(PRODUCTS_PER_PAGE * (page - 1))
       .take(PRODUCTS_PER_PAGE)
-      .orderBy({ price: orderPrice })
+      .orderBy('product.price', orderPrice)
       .getMany();
   }
 
-  public handleFindById(id: number): Promise<Product> {
+  public handleFindById(id: string): Promise<Product> {
     return this.productRepository.findOneOrFail(id);
+  }
+
+  public async handleCsvExport(
+    userId: string,
+    res: Response,
+    { orderPrice = ORDER.ASC, page = 1, searchTerm = '' }: FindProductQueryDto,
+  ): Promise<Response> {
+    const products = await this.productRepository.query(`
+      SELECT product.name, description, price, "createdAt" , string_agg(prop.name || ': ' || prop.value, ', ') as property
+      FROM product, json_to_recordset(product.property) AS prop("name" text, "value" text)
+      WHERE user_id = ${userId} and product.name ILIKE '%${searchTerm}%'
+      GROUP BY id
+      ORDER BY price ${orderPrice}
+      LIMIT ${PRODUCTS_PER_PAGE} OFFSET ${PRODUCTS_PER_PAGE * (page - 1)};
+    `);
+
+    res.attachment(appConfig.PRODUCTS_EXPORT_FILE);
+    return write(products, { headers: true }).pipe(res);
+  }
+
+  public async handelCsvImport(user: Users, file: any): Promise<void> {
+    const stream = parse({ headers: true }).on('data', (row) => {
+      try {
+        const propertyArray = row.property
+          .split(',')
+          .map((el: string) => el.split(':'));
+
+        const propertyArrayOfJson = propertyArray.reduce(
+          (acc, curr) => [...acc, { ['name']: curr[0], ['value']: curr[1] }],
+          [],
+        );
+        this.productRepository.save({
+          ...row,
+          property: propertyArrayOfJson,
+          user,
+        });
+      } catch (e) {
+        throw new HttpException(
+          { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    });
+    stream.write(file.buffer);
+    stream.end();
   }
 
   public handelCreate(
     productDto: CreateProductDto,
-    user: User,
+    user: Users,
   ): Promise<Product> {
-    return this.productRepository.save({ ...productDto, user });
+    return this.productRepository.save({
+      ...productDto,
+      user,
+    });
   }
 
   public async handleDelete(id: number, userId: string): Promise<Product> {

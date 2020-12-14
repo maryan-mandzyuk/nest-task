@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LOGS_PER_PAGE } from 'src/constants';
+import { LOGS_PER_PAGE } from '../constants';
 import { Repository } from 'typeorm';
 import { FindLogsQueryDto } from './dto/find-logs.dto';
 import { Logs } from './logs.entity';

@@ -1,29 +1,36 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { compareSync, genSalt, hashSync } from 'bcrypt';
+import { compareSync } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
-import { appConfig } from 'src/AppConfig';
+import { appConfig, emailData } from '../AppConfig';
 import {
+  CONFIRM_EMAIL_HTML_HANDLER,
+  EMAIL_MESSAGES,
   ERROR_MESSAGES,
+  RESET_HTML_HANDLER,
+  SUCCESS_MESSAGES,
   TOKEN_TYPES,
   USER_REFRESH_TOKEN_KEY,
-} from 'src/constants';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { LoginUserDto } from 'src/users/dto/login-user.dto';
-import { User } from 'src/users/user.entity';
+} from '../constants';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginUserDto } from '../users/dto/login-user.dto';
+import { Users } from '../users/user.entity';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
-import { TokensResponse } from './auth.interfaces';
+import { ITokensResponse } from './auth.interfaces';
 import { AuthHelper } from './authHelper';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Users) private readonly userRepository: Repository<Users>,
     private readonly redisService: RedisService,
+    private readonly mailerService: MailerService,
   ) {}
 
-  public async handleLogin(loginDto: LoginUserDto): Promise<TokensResponse> {
+  public async handleLogin(loginDto: LoginUserDto): Promise<ITokensResponse> {
     try {
       const { userName, password } = loginDto;
       const user = await this.getUserByUserName({ userName });
@@ -31,7 +38,14 @@ export class AuthService {
       if (!user) {
         throw new HttpException(
           { message: ERROR_MESSAGES.USER_NOT_FOUND },
-          HttpStatus.NOT_FOUND,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      if (!user.isEmailConfirmed) {
+        throw new HttpException(
+          { message: ERROR_MESSAGES.EMAIL_NOT_CONFIRMED },
+          HttpStatus.FORBIDDEN,
         );
       }
 
@@ -40,7 +54,7 @@ export class AuthService {
       if (!isEqualPass) {
         throw new HttpException(
           { message: ERROR_MESSAGES.WRONG_PASSWORD },
-          HttpStatus.UNAUTHORIZED,
+          HttpStatus.FORBIDDEN,
         );
       }
 
@@ -58,13 +72,13 @@ export class AuthService {
       };
     } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.SEVER_ERROR, error: e },
-        HttpStatus.BAD_REQUEST,
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+        HttpStatus.FORBIDDEN,
       );
     }
   }
 
-  public async refreshTokens(refreshToken: string): Promise<TokensResponse> {
+  public async refreshTokens(refreshToken: string): Promise<ITokensResponse> {
     try {
       const { userId } = AuthHelper.decodeTokenPayload(refreshToken);
 
@@ -93,37 +107,122 @@ export class AuthService {
       };
     } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.SEVER_ERROR, error: e },
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
         HttpStatus.BAD_REQUEST,
       );
     }
   }
 
-  public async handleCreate(userDto: CreateUserDto): Promise<User> {
-    const { userName, password } = userDto;
-    const user = await this.getUserByUserName({ userName });
+  public async handleCreate(userDto: CreateUserDto): Promise<Users> {
+    try {
+      const { userName, password, email } = userDto;
 
-    if (user) {
+      const user = await this.getUserByUserName({ userName });
+
+      if (user) {
+        throw new HttpException(
+          { message: ERROR_MESSAGES.USER_NOT_UNIQUE },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const hashPass = await AuthHelper.hashPassword(password);
+      const newUser = await this.userRepository.save({
+        ...userDto,
+        password: hashPass,
+      });
+
+      const emailToken = this.handleTokenGenerateByType(
+        newUser.id,
+        TOKEN_TYPES.ACTIVATION,
+      );
+
+      await this.mailerService.sendMail({
+        to: email,
+        subject: EMAIL_MESSAGES.confirmMessageSubject,
+        text: EMAIL_MESSAGES.confirmMessageText,
+        html: CONFIRM_EMAIL_HTML_HANDLER(emailData.confirmUrl, emailToken),
+      });
+
+      return newUser;
+    } catch (e) {
       throw new HttpException(
-        { message: ERROR_MESSAGES.USER_NOT_UNIQUE },
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
         HttpStatus.BAD_REQUEST,
       );
     }
-
-    const hashPass = await this.hashPassword(password);
-
-    return await this.userRepository.save({
-      ...userDto,
-      password: hashPass,
-    });
   }
 
-  private handleTokensGenerate(userId: string | number): TokensResponse {
+  public async handleEmailConfirmation(emailToken: string): Promise<string> {
+    try {
+      const { userId } = AuthHelper.decodeTokenPayload(emailToken);
+      const user = await this.userRepository.findOneOrFail(userId);
+      user.isEmailConfirmed = true;
+      await this.userRepository.save(user);
+      return EMAIL_MESSAGES.confirmationMessage;
+    } catch (e) {
+      throw new HttpException(
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  public async handelPasswordResetRequest(email: string): Promise<string> {
+    try {
+      const user = await this.userRepository.findOneOrFail({
+        email,
+      });
+
+      const resetToken = this.handleTokenGenerateByType(
+        user.id,
+        TOKEN_TYPES.RESET,
+      );
+
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: EMAIL_MESSAGES.confirmMessageSubject,
+        text: EMAIL_MESSAGES.confirmMessageText,
+        html: RESET_HTML_HANDLER(resetToken),
+      });
+
+      return SUCCESS_MESSAGES.RESET_EMAIL_MESSAGE;
+    } catch (e) {
+      throw new HttpException(
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  public async handlePasswordReset(
+    token: string,
+    resetDto: ResetPasswordDto,
+  ): Promise<string> {
+    try {
+      const { userId } = AuthHelper.decodeTokenPayload(token);
+      const user = await this.userRepository.findOneOrFail(userId);
+
+      const hashPass = await AuthHelper.hashPassword(resetDto.newPassword);
+      await this.userRepository.save({
+        ...user,
+        password: hashPass,
+      });
+      return SUCCESS_MESSAGES.RESET_PASS;
+    } catch (e) {
+      throw new HttpException(
+        { message: ERROR_MESSAGES.SERVER_ERROR, error: e },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  private handleTokensGenerate(userId: string | number): ITokensResponse {
     const accessToken = sign(
       { userId, type: TOKEN_TYPES.ACCESS },
       appConfig.JWT_SECRET,
       {
-        expiresIn: `${appConfig.ACCESS_TOKEN_EXPIRE_MIN}m`,
+        expiresIn: appConfig.ACCESS_TOKEN_EXPIRE,
       },
     );
 
@@ -131,7 +230,7 @@ export class AuthService {
       { userId, type: TOKEN_TYPES.REFRESH },
       appConfig.JWT_SECRET,
       {
-        expiresIn: `${appConfig.REFRESH_TOKEN_EXPIRE_MIN}m`,
+        expiresIn: appConfig.REFRESH_TOKEN_EXPIRE,
       },
     );
     return {
@@ -140,20 +239,19 @@ export class AuthService {
     };
   }
 
-  private async hashPassword(password: string): Promise<string> {
-    try {
-      const salt = await genSalt(10);
-      const hashPass = await hashSync(password, salt);
-      return hashPass;
-    } catch (e) {
-      throw new HttpException(
-        { message: ERROR_MESSAGES.SEVER_ERROR, error: e },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  private handleTokenGenerateByType(userId: string, type: TOKEN_TYPES): string {
+    const emailToken = sign({ userId, type }, appConfig.JWT_SECRET, {
+      expiresIn: appConfig.ACTIVATION_TOKEN_EXPIRE,
+    });
+
+    return emailToken;
   }
 
-  private async getUserByUserName(query): Promise<User> {
-    return this.userRepository.createQueryBuilder('user').where(query).getOne();
+  private async getUserByUserName(query): Promise<Users> {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where(query)
+      .getOne();
   }
 }

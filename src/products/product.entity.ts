@@ -1,5 +1,7 @@
-import { Logs } from 'src/logs/logs.entity';
-import { User } from 'src/users/user.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Logs } from '../logs/logs.entity';
+import { PurchaseItem } from '../purchases/entities/purchaseItem.entity';
+import { Users } from '../users/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,31 +10,45 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
+import { ProductPropertyDto } from './dto/product-property.dto';
 
 @Entity()
 export class Product {
+  @ApiProperty()
   @PrimaryGeneratedColumn()
   id: string;
 
+  @ApiProperty()
   @Column()
   name: string;
 
+  @ApiProperty()
   @Column({ nullable: true })
   description: string;
 
+  @ApiProperty()
   @Column()
   price: string;
 
+  @ApiProperty()
   @Column({ type: 'timestamp', default: new Date() })
   createdAt: string;
 
+  @ApiProperty()
   @Column({ default: false })
   isDeleted: boolean;
 
-  @ManyToOne(() => User, (user) => user.products)
+  @ApiProperty({ type: () => [ProductPropertyDto] })
+  @Column('json')
+  property: ProductPropertyDto[];
+
+  @ManyToOne(() => Users, (user) => user.products)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user?: Users;
 
   @OneToMany(() => Logs, (log) => log.product)
-  logs: Logs[];
+  logs?: Logs[];
+
+  @OneToMany(() => PurchaseItem, (purchaseItem) => purchaseItem.product)
+  purchaseItems?: PurchaseItem[];
 }

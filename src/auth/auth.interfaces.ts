@@ -1,6 +1,6 @@
-import { TOKEN_TYPES } from 'src/constants';
+import { TOKEN_TYPES } from '../constants';
 
-export interface TokensResponse {
+export interface ITokensResponse {
   accessToken: string;
   refreshToken: string;
 }
@@ -8,4 +8,10 @@ export interface TokensResponse {
 export interface ITokenPayload {
   type: TOKEN_TYPES;
   userId: string;
+}
+
+export interface CustomRequest extends Request {
+  params?: {
+    emailToken: string;
+  };
 }
