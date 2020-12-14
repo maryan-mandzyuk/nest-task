@@ -26,5 +26,11 @@
     "host": "gmail.com",
     "fromMessage": "incora-nest",
     "confirmUrl": "http://localhost:3000/auth/confirm-email/"
+  },
+
+  "googleAuthConfig": {
+    "clientID": "",
+    "clientSecret": "",
+    "callbackURL": "http://localhost:3000/auth/google/redirect"
   }
 }

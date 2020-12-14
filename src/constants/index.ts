@@ -11,6 +11,7 @@ export const ERROR_MESSAGES = {
   TOKEN_INVALID: 'Invalid token',
   EMAIL_NOT_CONFIRMED: 'Email not confirmed. Pleas confirm email!',
   BAD_REQUEST: 'Bad request',
+  GOOGLE_AUTH: 'Google account not authenticated',
 };
 
 export const SUCCESS_MESSAGES = {

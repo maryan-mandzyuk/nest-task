@@ -24,6 +24,9 @@ export class Users {
   @Column()
   isEmailConfirmed: boolean;
 
+  @Column()
+  isThirdPartyRegister?: boolean;
+
   @ApiProperty()
   @Column()
   firstName: string;

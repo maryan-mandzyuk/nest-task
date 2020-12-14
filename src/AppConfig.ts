@@ -41,6 +41,13 @@ export const emailData = {
   confirmUrl: get('emailConfig.confirmUrl'),
 };
 
+export const googleAuthConfig = {
+  clientID: get('googleAuthConfig.clientID'),
+  clientSecret: get('googleAuthConfig.clientSecret'),
+  callbackURL: get('googleAuthConfig.callbackURL'),
+  scope: ['email', 'profile'],
+};
+
 export const emailTransport = `smtps://${emailData.email}:${emailData.password}@smtp.${emailData.host}`;
 
 export const emailConfig = {

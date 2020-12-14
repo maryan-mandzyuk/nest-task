@@ -11,6 +11,7 @@ import {
   SUCCESS_MESSAGES,
   TOKEN_TYPES,
   USER_REFRESH_TOKEN_KEY,
+  USER_ROLES,
 } from '../constants';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
@@ -21,6 +22,7 @@ import { ITokensResponse } from './auth.interfaces';
 import { AuthHelper } from './authHelper';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { TokensResponse } from './TokensResponse';
 
 @Injectable()
 export class AuthService {
@@ -215,6 +217,41 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  public async googleLogin(googleUser): Promise<TokensResponse> {
+    let id: string;
+    if (!googleUser) {
+      throw new HttpException(
+        { message: ERROR_MESSAGES.GOOGLE_AUTH },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { email: googleUser.email },
+    });
+
+    if (!user) {
+      const cratedUser: Users = await this.userRepository.save({
+        userName: googleUser.lastName,
+        isThirdPartyRegister: true,
+        isEmailConfirmed: true,
+        role: USER_ROLES.seller,
+        ...googleUser,
+      });
+      id = cratedUser.id;
+    } else {
+      id = user.id;
+    }
+
+    const { accessToken, refreshToken } = this.handleTokensGenerate(id);
+    const refreshTokenKey = USER_REFRESH_TOKEN_KEY(id);
+
+    const redisClient = await this.redisService.getClient();
+    await redisClient.set(refreshTokenKey, refreshToken);
+
+    return { accessToken, refreshToken };
   }
 
   private handleTokensGenerate(userId: string | number): ITokensResponse {

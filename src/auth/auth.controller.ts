@@ -13,6 +13,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { Users } from '../users/user.entity';
 import { AuthGuard } from './guards/auth.guard';
+import { AuthGuard as PassportGuard } from '@nestjs/passport';
 import { CustomRequest, ITokensResponse } from './auth.interfaces';
 import { AuthService } from './auth.service';
 import { AuthHelper } from './authHelper';
@@ -57,6 +58,16 @@ export class AuthController {
   refresh(@Req() req: CustomRequest): Promise<ITokensResponse> {
     const token = AuthHelper.getTokenFromRequest(req, TOKEN_KEY.REFRESH);
     return this.authService.refreshTokens(token);
+  }
+
+  @Get('/google')
+  @UseGuards(PassportGuard('google'))
+  async googleAuth() {}
+
+  @Get('/google/redirect')
+  @UseGuards(PassportGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    return this.authService.googleLogin(req.user);
   }
 
   @Get('/confirm-email/:emailToken')
