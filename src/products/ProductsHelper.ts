@@ -11,15 +11,17 @@ export class ProductsHelper {
     return props;
   }
 
-  static generateProductPropertyObjectsFromCsv(property): ProductPropertyDto[] {
+  static generateProductPropertyObjectsFromCsv(
+    property: string,
+  ): ProductPropertyDto[] {
     const propertyArray = this.propertyCsvToArray(property);
     return propertyArray.reduce(
       (acc, curr) => [...acc, { ['name']: curr[0], ['value']: curr[1] }],
       [],
-    );
+    ) as ProductPropertyDto[];
   }
 
-  private static propertyCsvToArray(property) {
+  private static propertyCsvToArray(property: string): string[][] {
     return property.split(',').map((el: string) => el.split(':'));
   }
 }
