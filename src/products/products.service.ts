@@ -48,10 +48,8 @@ export class ProductsService {
   public async handelCsvImport(user: Users, file: any): Promise<void> {
     const stream = parse({ headers: true }).on('data', (row) => {
       try {
-        const propertyArray = ProductsHelper.propertyCsvToArray(row.property);
-
         const propertyArrayOfJson = ProductsHelper.generateProductPropertyObjectsFromCsv(
-          propertyArray,
+          row.property,
         );
 
         this.productRepository.save({
