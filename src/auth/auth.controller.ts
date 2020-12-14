@@ -66,7 +66,7 @@ export class AuthController {
 
   @Get('/google/redirect')
   @UseGuards(PassportGuard('google'))
-  googleAuthRedirect(@Req() req) {
+  googleAuthRedirect(@Req() req): Promise<ITokensResponse> {
     return this.authService.googleLogin(req.user);
   }
 
