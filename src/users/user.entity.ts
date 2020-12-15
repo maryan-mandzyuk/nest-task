@@ -5,6 +5,7 @@ import { Logs } from '../logs/logs.entity';
 import { Product } from '../products/product.entity';
 import { Purchase } from '../purchases/entities/purchase.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { WebHookData } from 'src/webHooks/webHook.entity';
 
 @Entity()
 export class Users {
@@ -52,4 +53,7 @@ export class Users {
 
   @OneToMany(() => Purchase, (purchase) => purchase.user)
   purchases?: Purchase[];
+
+  @OneToMany(() => WebHookData, (webHook) => webHook.user)
+  webHooks?: WebHookData[];
 }

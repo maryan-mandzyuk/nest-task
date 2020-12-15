@@ -10,6 +10,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { PurchasesModule } from './purchases/purchases.module';
+import { WebHooksModule } from './webHooks/webHooks.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PurchasesModule } from './purchases/purchases.module';
     PurchasesModule,
     RedisModule.register(redisConfig),
     MailerModule.forRoot(emailConfig),
+    WebHooksModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: RolesGuard }],
