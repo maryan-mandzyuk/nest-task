@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { CreateOauthAppDto } from './dto/create-oauth.dto';
 import { QueryOauthAppDto } from './dto/query-oauthApp.dto';
 import { OauthApp } from './oauthApp.entity';
+import { OAuthResponse } from './oauthApp.interfaces';
 
 @Injectable()
 export class OauthAppService {
@@ -31,7 +32,10 @@ export class OauthAppService {
     });
   }
 
-  public async authApp(query: QueryOauthAppDto, secret: string) {
+  public async authApp(
+    query: QueryOauthAppDto,
+    secret: string,
+  ): Promise<OAuthResponse> {
     try {
       const app = await this.oauthAppRepository.findOneOrFail(query.clientId);
       if (app.secret !== secret) {

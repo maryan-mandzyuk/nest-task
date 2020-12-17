@@ -18,6 +18,7 @@ import { OauthApp } from './oauthApp.entity';
 import { OauthAppService } from './oauthApp.service';
 import { UriGuard } from './guards/uri.guard';
 import { SecretGuard } from './guards/secret.guard';
+import { OAuthResponse } from './oauthApp.interfaces';
 
 @Controller('oauthApps')
 @ApiTags('OauthApps')
@@ -42,7 +43,10 @@ export class OauthAppController {
   @ApiQuery({
     type: QueryOauthAppDto,
   })
-  authApp(@Query() query: QueryOauthAppDto, @Request() req) {
+  authApp(
+    @Query() query: QueryOauthAppDto,
+    @Request() req,
+  ): Promise<OAuthResponse> {
     return this.oauthAppService.authApp(query, req.headers.secret);
   }
 
