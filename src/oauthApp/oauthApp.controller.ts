@@ -49,7 +49,7 @@ export class OauthAppController {
 
   @Get('/data')
   @UseGuards(TokenGuard)
-  getUserData(@Body() body: { email: string }, @Req() req) {
+  getUserData(@Body() body: { email: string }, @Req() req): Promise<void> {
     return this.oauthAppService.handleFindUser(body.email, req.headers.token);
   }
 }

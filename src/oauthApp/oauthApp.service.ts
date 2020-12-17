@@ -41,7 +41,7 @@ export class OauthAppService {
         );
       }
       const accessToken = sign({ clientId: app.id }, appConfig.OAUTH_SECRET, {
-        expiresIn: '30m',
+        expiresIn: appConfig.OAUTH_SECRET_EXPIRE,
       });
 
       return { accessToken, state: query.state };
@@ -53,7 +53,7 @@ export class OauthAppService {
     }
   }
 
-  public async handleFindUser(email: string, token: string) {
+  public async handleFindUser(email: string, token: string): Promise<void> {
     const user = await this.usersRepository.findOneOrFail(email);
     const { clientId } = decode(token) as { clientId: string };
 

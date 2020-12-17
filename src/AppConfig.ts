@@ -8,6 +8,7 @@ export const appConfig = {
   REFRESH_TOKEN_EXPIRE: get('appConfig.refreshTokenExpire'),
   ACTIVATION_TOKEN_EXPIRE: get('appConfig.activationTokenExpire'),
   OAUTH_SECRET: 'OAuthSecret',
+  OAUTH_SECRET_EXPIRE: '30m',
   RESET_TOKEN_EXPIRE: get('appConfig.resetTokenExpire'),
   PRODUCTS_EXPORT_FILE: get('appConfig.exportProductsFileName'),
   PRODUCTS_IMPORT_FILE: get('appConfig.importProductsFileName'),
