@@ -18,7 +18,6 @@ import { OauthApp } from './oauthApp.entity';
 import { OauthAppService } from './oauthApp.service';
 import { UriGuard } from './guards/uri.guard';
 import { SecretGuard } from './guards/secret.guard';
-import { TokenGuard } from './guards/token.guard';
 
 @Controller('oauthApps')
 @ApiTags('OauthApps')
@@ -39,7 +38,7 @@ export class OauthAppController {
 
   @Get()
   @UseGuards(UriGuard)
-  @UseGuards(SecretGuard)
+  @UseGuards(new SecretGuard('secret'))
   @ApiQuery({
     type: QueryOauthAppDto,
   })
@@ -48,7 +47,7 @@ export class OauthAppController {
   }
 
   @Get('/data')
-  @UseGuards(TokenGuard)
+  @UseGuards(new SecretGuard('token'))
   getUserData(@Body() body: { email: string }, @Req() req): Promise<void> {
     return this.oauthAppService.handleFindUser(body.email, req.headers.token);
   }

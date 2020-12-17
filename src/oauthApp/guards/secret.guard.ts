@@ -12,16 +12,16 @@ import { ERROR_MESSAGES } from '../../constants';
 
 @Injectable()
 export class SecretGuard implements CanActivate {
-  constructor() {}
+  constructor(private headerName: string) {}
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     try {
       const request = context.switchToHttp().getRequest();
 
-      const { secret } = request.headers;
+      const token = request.headers[this.headerName];
 
-      verify(secret, appConfig.OAUTH_SECRET);
+      verify(token, appConfig.OAUTH_SECRET);
 
       return true;
     } catch (e) {
