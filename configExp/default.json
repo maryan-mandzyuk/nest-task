@@ -14,7 +14,8 @@
     "activationTokenExpire": "2d",
     "resetTokenExpire": "1d",
     "exportProductsFileName": "products.csv",
-    "importProductsFileName": "file"
+    "importProductsFileName": "file",
+    "weatherApiKey": ""
   },
   "redisConfig": {
     "port": 6379,

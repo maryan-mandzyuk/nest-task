@@ -12,6 +12,7 @@ export const appConfig = {
   RESET_TOKEN_EXPIRE: get('appConfig.resetTokenExpire'),
   PRODUCTS_EXPORT_FILE: get('appConfig.exportProductsFileName'),
   PRODUCTS_IMPORT_FILE: get('appConfig.importProductsFileName'),
+  WEATHER_API_KEY: get('appConfig.weatherApiKey'),
 };
 
 export const dbConfig: PostgresConnectionOptions = {

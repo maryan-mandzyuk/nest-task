@@ -12,6 +12,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { PurchasesModule } from './purchases/purchases.module';
 import { WebHooksModule } from './webHooks/webHooks.module';
 import { OauthAppModule } from './oauthApp/oauthApp.module';
+import { WeatherModule } from './weather/weather.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { OauthAppModule } from './oauthApp/oauthApp.module';
     MailerModule.forRoot(emailConfig),
     WebHooksModule,
     OauthAppModule,
+    WeatherModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: RolesGuard }],
