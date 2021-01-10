@@ -10,6 +10,7 @@ import { FindProductQueryDto } from './dto/find-product.dto';
 import { write, parse } from 'fast-csv';
 import { Response } from 'express';
 import { appConfig } from '../AppConfig';
+import { ProductsHelper } from './ProductsHelper';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -18,23 +19,10 @@ export class ProductsService {
   ) {}
 
   public async handleFindProducts(
-    { orderPrice = ORDER.ASC, page = 1, searchTerm }: FindProductQueryDto,
+    query: FindProductQueryDto,
     userId?: string,
   ): Promise<Product[]> {
-    return this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.user', 'user')
-      .where(userId ? 'product.user_id = :userId' : 'TRUE', {
-        userId,
-      })
-      .andWhere('product.isDeleted = false')
-      .andWhere(searchTerm ? 'product.name ILIKE :searchTerm' : 'TRUE', {
-        searchTerm: `%${searchTerm}%`,
-      })
-      .skip(PRODUCTS_PER_PAGE * (page - 1))
-      .take(PRODUCTS_PER_PAGE)
-      .orderBy('product.price', orderPrice)
-      .getMany();
+    return this.getProductsByQuery(query, userId);
   }
 
   public handleFindById(id: string): Promise<Product> {
@@ -44,32 +32,26 @@ export class ProductsService {
   public async handleCsvExport(
     userId: string,
     res: Response,
-    { orderPrice = ORDER.ASC, page = 1, searchTerm = '' }: FindProductQueryDto,
+    query: FindProductQueryDto,
   ): Promise<Response> {
-    const products = await this.productRepository.query(`
-      SELECT product.name, description, price, "createdAt" , string_agg(prop.name || ': ' || prop.value, ', ') as property
-      FROM product, json_to_recordset(product.property) AS prop("name" text, "value" text)
-      WHERE user_id = ${userId} and product.name ILIKE '%${searchTerm}%'
-      GROUP BY id
-      ORDER BY price ${orderPrice}
-      LIMIT ${PRODUCTS_PER_PAGE} OFFSET ${PRODUCTS_PER_PAGE * (page - 1)};
-    `);
+    const products = await this.getProductsByQuery(query, userId);
+
+    const productsForCsv = products.map((product) => ({
+      ...product,
+      property: ProductsHelper.productPropertiesToObjects(product),
+    }));
 
     res.attachment(appConfig.PRODUCTS_EXPORT_FILE);
-    return write(products, { headers: true }).pipe(res);
+    return write(productsForCsv, { headers: true }).pipe(res);
   }
 
   public async handelCsvImport(user: Users, file: any): Promise<void> {
     const stream = parse({ headers: true }).on('data', (row) => {
       try {
-        const propertyArray = row.property
-          .split(',')
-          .map((el: string) => el.split(':'));
-
-        const propertyArrayOfJson = propertyArray.reduce(
-          (acc, curr) => [...acc, { ['name']: curr[0], ['value']: curr[1] }],
-          [],
+        const propertyArrayOfJson = ProductsHelper.generateProductPropertyObjectsFromCsv(
+          row.property,
         );
+
         this.productRepository.save({
           ...row,
           property: propertyArrayOfJson,
@@ -82,6 +64,7 @@ export class ProductsService {
         );
       }
     });
+
     stream.write(file.buffer);
     stream.end();
   }
@@ -119,6 +102,35 @@ export class ProductsService {
       ...product,
       ...productDto,
     });
+  }
+
+  private async getProductsByQuery(
+    { orderPrice = ORDER.ASC, page = 1, searchTerm }: FindProductQueryDto,
+    userId: string,
+  ): Promise<Product[]> {
+    const query = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoin('product.user', 'user')
+      .where('product.isDeleted = false');
+
+    if (userId) {
+      query.andWhere('product.user_id = :userId', {
+        userId,
+      });
+    }
+
+    if (searchTerm) {
+      query.andWhere('product.name ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      });
+    }
+    const products = await query
+      .skip(PRODUCTS_PER_PAGE * (page - 1))
+      .take(PRODUCTS_PER_PAGE)
+      .orderBy('product.price', orderPrice)
+      .getMany();
+
+    return products;
   }
 
   private async getProductByIdAndUserId(query): Promise<Product> {

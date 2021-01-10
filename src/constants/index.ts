@@ -11,6 +11,7 @@ export const ERROR_MESSAGES = {
   TOKEN_INVALID: 'Invalid token',
   EMAIL_NOT_CONFIRMED: 'Email not confirmed. Pleas confirm email!',
   BAD_REQUEST: 'Bad request',
+  GOOGLE_AUTH: 'Google account not authenticated',
 };
 
 export const SUCCESS_MESSAGES = {
@@ -33,6 +34,14 @@ export enum TOKEN_TYPES {
   ACTIVATION = 'activation',
   RESET = 'reset',
 }
+
+export const TOKEN_TYPE_KEY = {
+  [TOKEN_TYPES.ACCESS]: TOKEN_KEY.ACCESS,
+  [TOKEN_TYPES.REFRESH]: TOKEN_KEY.REFRESH,
+  [TOKEN_TYPES.ACTIVATION]: TOKEN_KEY.ACTIVATION,
+  [TOKEN_TYPES.RESET]: TOKEN_KEY.RESET,
+};
+
 export const USER_REFRESH_TOKEN_KEY = (userId) => `refreshToken_${userId}`;
 
 export const CONFIRM_EMAIL_HTML_HANDLER = (url: string, token: string) =>

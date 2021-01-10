@@ -1,6 +1,9 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { USER_ROLES } from '../../constants';
+import { Users } from '../../users/user.entity';
 import { Repository } from 'typeorm';
+import { CreateProductDto } from '../dto/create-product.dto';
 import { Product } from '../product.entity';
 import { ProductsService } from '../products.service';
 import { ProductsRepositoryFake } from './productsRepositoryFake';
@@ -23,6 +26,17 @@ describe('Products Service', () => {
     ],
     id: '1',
   };
+
+  const user: Users = {
+    id: '1',
+    userName: 'admin',
+    email: 'mandzyuk.maryan@gmail.com',
+    isEmailConfirmed: true,
+    firstName: 'first name',
+    lastName: 'last name',
+    role: USER_ROLES.seller,
+  };
+
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -47,10 +61,33 @@ describe('Products Service', () => {
         .spyOn(productRepo, 'findOneOrFail')
         .mockResolvedValueOnce(product);
 
-      const foundUser = await productService.handleFindById(id);
+      const foundProduct = await productService.handleFindById(id);
       expect(findSpy).toBeCalledWith(id);
-      expect(foundUser).toEqual(product);
-      expect.assertions(2);
+      expect(foundProduct).toEqual(product);
+    });
+  });
+
+  describe('handleCreate', () => {
+    const productDto: CreateProductDto = {
+      name: 'new prod',
+      price: '99',
+      description: 'new prod description',
+      property: [
+        {
+          name: 'color',
+          value: 'white',
+        },
+      ],
+    };
+
+    it('Should crate new product, product dto provided right', async () => {
+      const saveSpy = jest
+        .spyOn(productRepo, 'save')
+        .mockResolvedValueOnce({ ...product, ...productDto });
+
+      const savedProduct = await productService.handelCreate(productDto, user);
+      expect(saveSpy).toBeCalledWith({ ...productDto, user });
+      expect(savedProduct).toMatchObject(productDto);
     });
   });
 });

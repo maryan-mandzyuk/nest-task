@@ -7,9 +7,12 @@ export const appConfig = {
   ACCESS_TOKEN_EXPIRE: get('appConfig.accessTokenExpire'),
   REFRESH_TOKEN_EXPIRE: get('appConfig.refreshTokenExpire'),
   ACTIVATION_TOKEN_EXPIRE: get('appConfig.activationTokenExpire'),
+  OAUTH_SECRET: 'OAuthSecret',
+  OAUTH_SECRET_EXPIRE: '30m',
   RESET_TOKEN_EXPIRE: get('appConfig.resetTokenExpire'),
   PRODUCTS_EXPORT_FILE: get('appConfig.exportProductsFileName'),
   PRODUCTS_IMPORT_FILE: get('appConfig.importProductsFileName'),
+  WEATHER_API_KEY: get('appConfig.weatherApiKey'),
 };
 
 export const dbConfig: PostgresConnectionOptions = {
@@ -39,6 +42,13 @@ export const emailData = {
   host: get('emailConfig.host'),
   fromMessage: get('emailConfig.fromMessage'),
   confirmUrl: get('emailConfig.confirmUrl'),
+};
+
+export const googleAuthConfig = {
+  clientID: get('googleAuthConfig.clientID'),
+  clientSecret: get('googleAuthConfig.clientSecret'),
+  callbackURL: get('googleAuthConfig.callbackURL'),
+  scope: ['email', 'profile'],
 };
 
 export const emailTransport = `smtps://${emailData.email}:${emailData.password}@smtp.${emailData.host}`;

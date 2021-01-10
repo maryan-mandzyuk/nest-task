@@ -10,6 +10,9 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { PurchasesModule } from './purchases/purchases.module';
+import { WebHooksModule } from './webHooks/webHooks.module';
+import { OauthAppModule } from './oauthApp/oauthApp.module';
+import { WeatherModule } from './weather/weather.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { PurchasesModule } from './purchases/purchases.module';
     PurchasesModule,
     RedisModule.register(redisConfig),
     MailerModule.forRoot(emailConfig),
+    WebHooksModule,
+    OauthAppModule,
+    WeatherModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: RolesGuard }],

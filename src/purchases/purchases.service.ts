@@ -1,6 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import axios from 'axios';
 import {
   customerOrderHtml,
   EMAIL_MESSAGES,
@@ -14,6 +15,7 @@ import { UpdatePurchaseDto } from './dto/update-purchase.dto';
 import { UpdatePurchaseItemDto } from './dto/update-purchaseItem.dto';
 import { Purchase } from './entities/purchase.entity';
 import { PurchaseItem } from './entities/purchaseItem.entity';
+import { WebHookData } from 'src/webHooks/webHook.entity';
 @Injectable()
 export class PurchasesService {
   constructor(
@@ -21,6 +23,8 @@ export class PurchasesService {
     private readonly purchaseRepository: Repository<Purchase>,
     @InjectRepository(PurchaseItem)
     private readonly purchaseItemRepository: Repository<PurchaseItem>,
+    @InjectRepository(WebHookData)
+    private readonly webHookRepository: Repository<WebHookData>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private readonly connection: Connection,
@@ -28,7 +32,7 @@ export class PurchasesService {
   ) {}
 
   public async handleCreate(purchaseDto: CreatePurchaseDto): Promise<Purchase> {
-    return this.connection.transaction(async (manager) => {
+    const purchase = await this.connection.transaction(async (manager) => {
       try {
         const purchaseTransaction = manager.getRepository<Purchase>(Purchase);
         const purchaseItemTransaction = manager.getRepository<PurchaseItem>(
@@ -45,7 +49,7 @@ export class PurchasesService {
           purchaseItemTransaction,
         );
 
-        await this.mailerService.sendMail({
+        this.mailerService.sendMail({
           to: purchaseDto.email,
           subject: EMAIL_MESSAGES.customerOrderSubject,
           text: EMAIL_MESSAGES.customerOrderText,
@@ -60,15 +64,12 @@ export class PurchasesService {
         );
       }
     });
+    this.handleSendPurchaseWithHook(purchase);
+    return purchase;
   }
 
   public handleFindById(id: string): Promise<Purchase> {
-    return this.purchaseRepository
-      .createQueryBuilder('purchase')
-      .leftJoinAndSelect('purchase.purchaseItems', 'purchase_item')
-      .leftJoinAndSelect('purchase_item.product', 'product')
-      .where('purchase.id = :id', { id })
-      .getOneOrFail();
+    return this.findPurchaseById(id);
   }
 
   public handleFindBySeller(id: string): Promise<Purchase[]> {
@@ -111,6 +112,15 @@ export class PurchasesService {
 
   public handleDelete(id: number): Promise<DeleteResult> {
     return this.purchaseRepository.delete({ id });
+  }
+
+  private findPurchaseById(id: string | number): Promise<Purchase> {
+    return this.purchaseRepository
+      .createQueryBuilder('purchase')
+      .leftJoinAndSelect('purchase.purchaseItems', 'purchase_item')
+      .leftJoinAndSelect('purchase_item.product', 'product')
+      .where('product.user_id = :id', { id })
+      .getOneOrFail();
   }
 
   private updatePurchaseItem = async (
@@ -156,4 +166,19 @@ export class PurchasesService {
       ),
     );
   };
+
+  private async handleSendPurchaseWithHook(purchase: Purchase): Promise<void> {
+    const webHookData = await this.webHookRepository.find({
+      where: { user: purchase.user },
+    });
+    const createdPurchase = await this.findPurchaseById(purchase.user.id);
+    this.handleSendArrayPurchaseData(webHookData, createdPurchase);
+  }
+
+  private handleSendArrayPurchaseData(
+    webHookData: WebHookData[],
+    purchase: Purchase,
+  ): void {
+    Promise.all(webHookData.map((data) => axios.post(data.url, { purchase })));
+  }
 }

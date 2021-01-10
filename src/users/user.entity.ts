@@ -5,6 +5,8 @@ import { Logs } from '../logs/logs.entity';
 import { Product } from '../products/product.entity';
 import { Purchase } from '../purchases/entities/purchase.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { WebHookData } from 'src/webHooks/webHook.entity';
+import { OauthApp } from 'src/oauthApp/oauthApp.entity';
 
 @Entity()
 export class Users {
@@ -23,6 +25,9 @@ export class Users {
   @ApiProperty()
   @Column()
   isEmailConfirmed: boolean;
+
+  @Column()
+  isThirdPartyRegister?: boolean;
 
   @ApiProperty()
   @Column()
@@ -49,4 +54,10 @@ export class Users {
 
   @OneToMany(() => Purchase, (purchase) => purchase.user)
   purchases?: Purchase[];
+
+  @OneToMany(() => WebHookData, (webHook) => webHook.user)
+  webHooks?: WebHookData[];
+
+  @OneToMany(() => OauthApp, (oauthApp) => oauthApp.user)
+  oauthApps?: OauthApp[];
 }

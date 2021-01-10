@@ -2,7 +2,12 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { genSalt, hashSync } from 'bcrypt';
 import { decode, verify } from 'jsonwebtoken';
 import { appConfig } from '../AppConfig';
-import { ERROR_MESSAGES, TOKEN_KEY, TOKEN_TYPES } from '../constants';
+import {
+  ERROR_MESSAGES,
+  TOKEN_KEY,
+  TOKEN_TYPES,
+  TOKEN_TYPE_KEY,
+} from '../constants';
 import { CustomRequest, ITokenPayload } from './auth.interfaces';
 
 export class AuthHelper {
@@ -39,17 +44,6 @@ export class AuthHelper {
   }
 
   static getTokenHeaderKey(type: TOKEN_TYPES): TOKEN_KEY {
-    switch (type) {
-      case TOKEN_TYPES.ACCESS:
-        return TOKEN_KEY.ACCESS;
-      case TOKEN_TYPES.REFRESH:
-        return TOKEN_KEY.REFRESH;
-      case TOKEN_TYPES.ACTIVATION:
-        return TOKEN_KEY.ACTIVATION;
-      case TOKEN_TYPES.RESET:
-        return TOKEN_KEY.RESET;
-      default:
-        break;
-    }
+    return TOKEN_TYPE_KEY[type];
   }
 }
